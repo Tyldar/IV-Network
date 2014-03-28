@@ -134,6 +134,8 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	// Send it back to the player
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_INITIAL_DATA), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 
+	unsigned char * pClothes = 0;
+	
 	for (EntityId i = 0; i < CServer::GetInstance()->GetPlayerManager()->GetMax(); ++i)
 	{
 		if (CServer::GetInstance()->GetPlayerManager()->DoesExists(i) && i != playerId)
@@ -142,6 +144,9 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 			bitStream.Write(i);
 			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetName().Get());
 			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetColor());
+			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetModel());
+			for (int c = 0; c < 11; c++) pClothes[c] = CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetClothes(c);
+			bitStream.Write(pClothes);
 			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_NEW_PLAYER), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 		}
 	}

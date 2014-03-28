@@ -142,6 +142,17 @@ void PlayerJoin(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 	// Notify the playermanager that we're having a new player
 	g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
+
+	int pModel = 0;
+
+	if (pBitStream->Read(pModel))
+	{
+		pEntity->SetModel(pModel);
+		unsigned char * pClothes;
+		pBitStream->Read(pClothes);
+		for (int i = 0; i < 11; i++) pEntity->SetClothes(i, pClothes[i]);
+
+	}
 }
 
 void PlayerLeave(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
