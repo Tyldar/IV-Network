@@ -97,6 +97,8 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	CPlayerEntity * pPlayer = new CPlayerEntity();
 
 	pPlayer->SetName(strName);
+	
+	pPlayer->SetSerial(strSerial.Get());
 
 	// Do we need the id; maybe internal for easier sync but definetly not public to the scripting engine
 	pPlayer->SetId(CServer::GetInstance()->GetPlayerManager()->Add(pPlayer));

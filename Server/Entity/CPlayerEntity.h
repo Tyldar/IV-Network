@@ -29,6 +29,7 @@ private:
 	ePackageType m_eLastSyncPackageType;
 
 	CString		m_strName;
+	CString		m_strSerial;
 	
 	CVector3	m_vecDirection;
 	CVector3	m_vecRoll;
@@ -88,6 +89,9 @@ public:
 
 	void		SetName(const CString& strName) { m_strName = strName; }
 	CString		GetName() { return m_strName; }
+
+	void		SetSerial(const CString& strSerial) { m_strSerial = strSerial; }
+	CString		GetSerial() { return m_strSerial; }
 
 	void		SetDirection(const CVector3& vecDirection) { m_vecDirection = vecDirection; }
 	CVector3	GetDirection() { return m_vecDirection; }
@@ -175,6 +179,8 @@ public:
 	void		SetName(CString szName);
 
 	CString GetName() { return GetEntity()->GetName(); }
+
+	CString GetSerial() { return GetEntity()->GetSerial(); }
 
 	void SetModel(int iModel);
 

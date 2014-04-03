@@ -324,6 +324,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("spawn", &CScriptPlayer::Spawn).
 			AddMethod("getVehicle", &CScriptPlayer::GetVehicle).
 			AddMethod("getVehicleSeat", &CScriptPlayer::GetVehicleSeat).
+			AddMethod("getSerial", &CScriptPlayer::GetSerial).
 			AddMethod("triggerPlayerEvent", &CScriptPlayer::TriggerPlayerEvent);
 		(pScriptPlayer)->Register(pVM);
 	}
@@ -333,6 +334,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("setPosition", &CScriptVehicle::SetPosition).
 			AddMethod("getPosition", &CScriptVehicle::GetPosition).
 			AddMethod("setRotation", &CScriptVehicle::SetRotation).
+			AddMethod("getRotation", &CScriptVehicle::GetRotation).
 			AddMethod("setMoveSpeed", &CScriptVehicle::SetMoveSpeed).
 			AddMethod("setTurnSpeed", &CScriptVehicle::SetTurnSpeed).
 			AddMethod("setHealth", &CScriptVehicle::SetHealth).

@@ -86,6 +86,8 @@ public:
 	
 	void					SetPosition(float fX, float fY, float fZ);
 	void					SetRotation(float fX, float fY, float fZ);
+	CVector3				GetRotation() { CVector3 vecRot; GetEntity()->GetRotation(vecRot); return vecRot; };
+	
 	void					SetMoveSpeed(float fX, float fY, float fZ);
 	void					SetTurnSpeed(float fX, float fY, float fZ);
 
