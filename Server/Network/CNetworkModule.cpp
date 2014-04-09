@@ -139,6 +139,11 @@ int CNetworkModule::GetPlayerPing(EntityId playerId)
 	return m_pRakPeer->GetLastPing(m_pRakPeer->GetSystemAddressFromIndex(playerId));
 }
 
+void CNetworkModule::KickPlayer(EntityId playerId)
+{
+	m_pRakPeer->CloseConnection(m_pRakPeer->GetSystemAddressFromIndex(playerId), true, 0, HIGH_PRIORITY);
+}
+
 void CNetworkModule::UpdateNetwork(void)
 {
 	// Create a packet

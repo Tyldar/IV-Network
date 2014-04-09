@@ -135,8 +135,6 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 	// Send it back to the player
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_INITIAL_DATA), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
-
-	unsigned char * pClothes = 0;
 	
 	for (EntityId i = 0; i < CServer::GetInstance()->GetPlayerManager()->GetMax(); ++i)
 	{
@@ -147,9 +145,8 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetName().Get());
 			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetColor());
 			bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetModel());
-			for (int c = 0; c < 11; c++) pClothes[c] = CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetClothes(c);
-			bitStream.Write(pClothes);
-			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_NEW_PLAYER), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
+			for (int c = 0; c < 11; c++) bitStream.Write(CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetClothes(c));
+			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_GET_PLAYER), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 		}
 	}
 	
@@ -157,7 +154,14 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	bitStream.Write(playerId);
 	bitStream.Write(pPlayer->GetName().Get());
 	bitStream.Write(pPlayer->GetColor());
-	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_NEW_PLAYER), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+
+	for (EntityId i = 0; i < CServer::GetInstance()->GetPlayerManager()->GetMax(); ++i)
+	{
+		if (CServer::GetInstance()->GetPlayerManager()->DoesExists(i) && i != playerId)
+		{
+			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_NEW_PLAYER), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, i, false);
+		}
+	}
 
 	CVector3 vecPosition;
 
@@ -418,7 +422,9 @@ void PlayerRequestSpawn(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 				CLogFile::Printf("Create vehicle %f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ);
 
 				pVehicle->GetRotation(vecRotation);
-				bitStream.Write(vecRotation.fX);
+				bitStream.Write(vecRotation);
+
+				bitStream.Write(pVehicle->GetHealth());
 
 				bitStream.Write(pVehicle->GetColor(1));
 				bitStream.Write(pVehicle->GetColor(2));
@@ -426,7 +432,7 @@ void PlayerRequestSpawn(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 				bitStream.Write(pVehicle->GetColor(4));
 				bitStream.Write(pVehicle->GetColor(5));
 
-				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_CREATE_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_GET_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 			}
 		}
 	}

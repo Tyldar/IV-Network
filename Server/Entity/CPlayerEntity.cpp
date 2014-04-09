@@ -424,6 +424,17 @@ void CScriptPlayer::Spawn(float fX, float fY, float fZ, float fA)
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_SPAWN), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, GetEntity()->GetId(), false);
 }
 
+int  CScriptPlayer::GetPing()
+{
+	return CServer::GetInstance()->GetNetworkModule()->GetPlayerPing(GetEntity()->GetId());
+}
+
+
+void CScriptPlayer::Kick()
+{
+	CServer::GetInstance()->GetNetworkModule()->KickPlayer(GetEntity()->GetId());
+}
+
 void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream, ePackageType pType)
 {
 	switch (pType)

@@ -171,6 +171,7 @@
     <ClCompile Include="..\Libraries\tinyxml\tinyxml.cpp" />
     <ClCompile Include="..\Libraries\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\Libraries\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\Shared\CLibrary.cpp" />
     <ClCompile Include="..\Shared\CLogFile.cpp" />
     <ClCompile Include="..\Shared\CSettings.cpp" />
     <ClCompile Include="..\Shared\CString.cpp" />
@@ -244,6 +245,7 @@
     <ClInclude Include="..\Libraries\lua\lundump.h" />
     <ClInclude Include="..\Libraries\lua\lvm.h" />
     <ClInclude Include="..\Libraries\lua\lzio.h" />
+    <ClInclude Include="..\Shared\CLibrary.h" />
     <ClInclude Include="..\Shared\Network\CBitStream.h" />
     <ClInclude Include="..\Shared\Network\PacketIdentifiers.h" />
     <ClInclude Include="..\Shared\Network\RPCIdentifiers.h" />

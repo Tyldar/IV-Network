@@ -234,6 +234,9 @@ public:
 	void 		SetHudElementVisible(int componentid, bool visible);
 
 	void 		TriggerPlayerEvent(CString eventName);
+
+	void		Kick();
+	int			GetPing();
 };
 
 #endif // CPlayerEntity_h

@@ -325,6 +325,8 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getVehicle", &CScriptPlayer::GetVehicle).
 			AddMethod("getVehicleSeat", &CScriptPlayer::GetVehicleSeat).
 			AddMethod("getSerial", &CScriptPlayer::GetSerial).
+			AddMethod("getPing", &CScriptPlayer::GetPing).
+			AddMethod("kick", &CScriptPlayer::Kick).
 			AddMethod("triggerPlayerEvent", &CScriptPlayer::TriggerPlayerEvent);
 		(pScriptPlayer)->Register(pVM);
 	}
