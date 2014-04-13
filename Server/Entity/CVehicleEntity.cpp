@@ -13,7 +13,7 @@
 #include <CServer.h>
 
 CVehicleEntity::CVehicleEntity() :
-	m_pScriptVehicle(nullptr), m_Matrix(Matrix()), m_fHealth(100),
+	m_pScriptVehicle(nullptr), m_Matrix(Matrix()), m_fHealth(1000.0f),
 	m_fPetrolHealth(100.0f), m_fSteeringAngle(0.0f), m_bEngineState(false),
 	m_iLockedState(0), m_iDirtLevel(0), m_fHeading(0.0f),
 	m_iModelId(0)

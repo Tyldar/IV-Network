@@ -500,6 +500,8 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream, ePackageType pType
 				VehiclePacket.vehHealth = pVehicle->GetHealth();
 				//VehiclePacket.petrol = pVehicle->GetPetrolTankHealth();
 				VehiclePacket.bEngineState = pVehicle->GetEngineState();
+				VehiclePacket.bSirenState = pVehicle->GetSirenState();
+				VehiclePacket.bLightsState = pVehicle->GetLightsState();
 				VehiclePacket.fHeading = pVehicle->GetHeading();
 				VehiclePacket.playerArmor = GetArmour();
 				VehiclePacket.playerHealth = GetHealth();
@@ -585,6 +587,8 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 				//pVehicle->SetPetrolTankHealth(VehiclePacket.petrol);
 
 				pVehicle->SetEngineState(VehiclePacket.bEngineState);
+				pVehicle->SetSirenState(VehiclePacket.bSirenState);
+				pVehicle->SetLightsState(VehiclePacket.bLightsState);
 				pVehicle->SetHeading(VehiclePacket.fHeading);
 
 				SetHealth(VehiclePacket.playerHealth);

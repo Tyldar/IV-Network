@@ -23,6 +23,8 @@ private:
 	float			m_fPetrolHealth;
 	float			m_fSteeringAngle;
 	bool			m_bEngineState;
+	bool			m_bSirenState;
+	bool			m_bLightsState;
 	int				m_iLockedState;
 	int				m_iDirtLevel;
 	float			m_fHeading;
@@ -72,6 +74,12 @@ public:
 
 	void								SetColor(BYTE id, DWORD color) { if (id < 1 || id > 5) assert(CString("Set color%i?! ARE YOU IDIOT?!", id).Get()); else m_dwColor[id - 1] = color; }
 	DWORD								GetColor(BYTE id) { if (id < 1 || id > 5) assert(CString("Get color%i?! ARE YOU IDIOT?!", id).Get()); return m_dwColor[id - 1]; }
+
+	bool								GetSirenState() { return m_bSirenState; }
+	void								SetSirenState(bool bSirenState) { m_bSirenState = bSirenState; }
+
+	bool								GetLightsState() { return m_bLightsState; }
+	void								SetLightsState(bool bLightsState) { m_bLightsState = bLightsState; }
 };
 
 class CScriptVehicle : public CScriptEntity

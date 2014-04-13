@@ -1689,6 +1689,8 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		VehiclePacket.vehHealth = m_pVehicle->GetHealth();
 		//VehiclePacket. = m_pVehicle->GetPetrolTankHealth();
 		VehiclePacket.bEngineState = m_pVehicle->GetEngineState();
+		VehiclePacket.bSirenState = m_pVehicle->GetSirenState();
+		VehiclePacket.bLightsState = m_pVehicle->GetGameVehicle()->GetHeadlights();
 		VehiclePacket.playerArmor = GetArmour();
 		VehiclePacket.playerHealth = GetHealth();
 		VehiclePacket.weapon.iAmmo = m_pPlayerWeapons->GetAmmo(m_pPlayerWeapons->GetCurrentWeapon());
@@ -1820,6 +1822,8 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 				m_pVehicle->SetHealth(VehiclePacket.vehHealth);
 				//m_pVehicle->SetPetrolTankHealth(VehiclePacket.petrol);
 				m_pVehicle->SetEngineState(VehiclePacket.bEngineState);
+				m_pVehicle->SetSirenState(VehiclePacket.bSirenState);
+				m_pVehicle->GetGameVehicle()->SetHeadlights(VehiclePacket.bLightsState);
 
 				SetArmour(VehiclePacket.playerArmor);
 				SetHealth(VehiclePacket.playerHealth);
