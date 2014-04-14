@@ -215,10 +215,7 @@ void CVehicle::SetSirenState(bool bStatus)
 
 	if(pVehicle && HasSiren())
 	{
-		if(bStatus)
-			*(BYTE *)(pVehicle + 0xF69) = *(BYTE *)(pVehicle + 0xF69) & 0x9F | 0x10;
-		else
-			*(BYTE *)(pVehicle + 0xF69) &= 0x8F;
+		EFLC::CScript::SwitchCarSiren(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(GetVehicle()), bStatus);
 	}
 }
 
@@ -229,13 +226,7 @@ bool CVehicle::GetSirenState()
 
 	if(pVehicle && HasSiren())
 	{
-		if(!IS_BIT_SET(*(BYTE *)(pVehicle + 0xF69), 0x10))
-			return false;
-
-		if(!IS_BIT_SET(*(BYTE *)(pVehicle + 0xF69), 0x20))
-			return false;
-
-		return true;
+		return EFLC::CScript::IsCarSirenOn(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(GetVehicle()));
 	}
 
 	return false;

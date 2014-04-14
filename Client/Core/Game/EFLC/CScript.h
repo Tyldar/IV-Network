@@ -204,6 +204,8 @@ namespace CScript
 	static bool IsCarInAirProper(unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CAR_IN_AIR_PROPER, vehicle); }
 	static void SetVehicleQuaternion(unsigned int vehicle, float rX, float rY, float rZ, float rW) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SET_VEHICLE_QUATERNION, vehicle, rX, rY, rZ, rW); }
 	static void GetVehicleQuaternion(unsigned int vehicle, float * rX, float * rY, float * rZ, float * rW) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_GET_VEHICLE_QUATERNION, vehicle, rX, rY, rZ, rW); }
+	static bool IsCarSirenOn(unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CAR_SIREN_ON, vehicle); }
+	static void SwitchCarSiren(unsigned int vehicle, bool state) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SWITCH_CAR_SIREN, vehicle, state); }
 
 	// Sound
 	static unsigned int RequestAmbientAudioBank(const char* szAudio) { return EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_REQUEST_AMBIENT_AUDIO_BANK, szAudio); }

@@ -1689,7 +1689,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		VehiclePacket.vehHealth = m_pVehicle->GetHealth();
 		//VehiclePacket. = m_pVehicle->GetPetrolTankHealth();
 		VehiclePacket.bEngineState = m_pVehicle->GetEngineState();
-		VehiclePacket.bSirenState = m_pVehicle->GetSirenState();
+		VehiclePacket.bSirenState = EFLC::CScript::IsCarSirenOn(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(m_pVehicle->GetGameVehicle()->GetVehicle()));
 		VehiclePacket.bLightsState = m_pVehicle->GetGameVehicle()->GetHeadlights();
 		VehiclePacket.playerArmor = GetArmour();
 		VehiclePacket.playerHealth = GetHealth();
