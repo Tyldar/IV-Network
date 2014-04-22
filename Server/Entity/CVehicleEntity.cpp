@@ -90,6 +90,26 @@ void CScriptVehicle::SetLocked(int iLocked)
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_LOCKED), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 }
 
+void CScriptVehicle::SetSiren(bool bSirenState)
+{
+	GetEntity()->SetSirenState(bSirenState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bSirenState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
+void CScriptVehicle::SetLights(bool bLightsState)
+{
+	GetEntity()->SetLightsState(bLightsState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bLightsState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
 void CScriptVehicle::SetEngine(bool bEngineState)
 {
 	GetEntity()->SetEngineState(bEngineState);

@@ -848,14 +848,14 @@ void ExitVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 void SetVehiclePosition(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		CVector3 vecPos;
@@ -867,14 +867,14 @@ void SetVehiclePosition(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 
 void SetVehicleRotation(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		CVector3 vecRot;
@@ -886,14 +886,14 @@ void SetVehicleRotation(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 
 void SetVehicleMoveSpeed(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		CVector3 vecMoveSpeed;
@@ -905,14 +905,14 @@ void SetVehicleMoveSpeed(RakNet::BitStream * pBitStream, RakNet::Packet * pPacke
 
 void SetVehicleTurnSpeed(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		CVector3 vecTurnSpeed;
@@ -924,14 +924,14 @@ void SetVehicleTurnSpeed(RakNet::BitStream * pBitStream, RakNet::Packet * pPacke
 
 void SetVehicleHealth(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		float fHealth;
@@ -943,14 +943,14 @@ void SetVehicleHealth(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 void SetVehicleLockedState(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		int iLocked;
@@ -962,14 +962,14 @@ void SetVehicleLockedState(RakNet::BitStream * pBitStream, RakNet::Packet * pPac
 
 void SetVehicleEngineState(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		bool bEngineState;
@@ -979,16 +979,54 @@ void SetVehicleEngineState(RakNet::BitStream * pBitStream, RakNet::Packet * pPac
 	}
 }
 
-void SetVehicleDirtLevel(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+void SetVehicleSirenState(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-	// Read the playerid
+	// Read the vehicleid
 	EntityId vehicleId;
 	pBitStream->Read(vehicleId);
 
-	// Get a pointer to the player
+	// Get a pointer to the vehicle
 	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
 
-	// Is the player pointer valid?
+	// Is the vehicle pointer valid?
+	if (pVehicle)
+	{
+		bool bSirenState;
+		pBitStream->Read(bSirenState);
+
+		pVehicle->SetSirenState(bSirenState);
+	}
+}
+
+void SetVehicleLightsState(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the vehicleid
+	EntityId vehicleId;
+	pBitStream->Read(vehicleId);
+
+	// Get a pointer to the vehicle
+	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
+
+	// Is the vehicle pointer valid?
+	if (pVehicle)
+	{
+		bool bLightsState;
+		pBitStream->Read(bLightsState);
+
+		pVehicle->SetLightsState(bLightsState);
+	}
+}
+
+void SetVehicleDirtLevel(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the vehicleid
+	EntityId vehicleId;
+	pBitStream->Read(vehicleId);
+
+	// Get a pointer to the vehicle
+	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
+
+	// Is the vehicle pointer valid?
 	if (pVehicle)
 	{
 		int iDirtLevel;
@@ -1356,6 +1394,8 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_HEALTH), SetVehicleHealth);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LOCKED), SetVehicleLockedState);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ENGINE), SetVehicleEngineState);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN), SetVehicleSirenState);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS), SetVehicleLightsState);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL), SetVehicleDirtLevel);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT), CreateCheckpoint);
@@ -1427,6 +1467,8 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_HEALTH));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LOCKED));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ENGINE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT));

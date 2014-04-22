@@ -15,6 +15,13 @@ CTimer::~CTimer()
 {
 }
 
+void CTimer::Stop()
+{
+	m_bRunning = false;
+	CServer::GetInstance()->GetTimerManager()->remove(this);
+	delete this;
+}
+
 bool CTimer::Pulse()
 {
 	if (m_bPaused || !m_bRunning)

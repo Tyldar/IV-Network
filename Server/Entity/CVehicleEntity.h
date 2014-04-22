@@ -110,6 +110,12 @@ public:
 	void					SetEngine(bool bEngineState);
 	bool					GetEngine() { return GetEntity()->GetEngineState(); };
 
+	bool					GetSiren() { return GetEntity()->GetSirenState(); };
+	void					SetSiren(bool bSirenState);
+
+	bool					GetLights() { return GetEntity()->GetLightsState(); };
+	void					SetLights(bool bLightsState);	
+	
 	void					SetDirtLevel(int iDirtLevel);
 	int						GetDirtLevel() { return GetEntity()->GetDirtLevel(); };
 };
