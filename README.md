@@ -5,11 +5,11 @@
 
 Three quick start options are available:
 
-* [Download the latest release](https://github.com/GTA-Network/IV-Network/archive/master.zip).
-* Clone the repo: `https://github.com/GTA-Network/IV-Network.git`.
-* For compiled nightly builds, visit http://nightly.gta-network.net
+* [Download the latest release](https://github.com/IV-Network/IV-Network/archive/master.zip).
+* Clone the repo: `https://github.com/IV-Network/IV-Network.git`.
+* For compiled builds, visit http://iv-network.net/?page=downloads
 
-Visit [IV:Network forum](http://gta-network.net/forum/) to stay up to date!
+Visit [IV:Network forum](http://forum.iv-network.net/) to stay up to date!
 
 ## Description
 

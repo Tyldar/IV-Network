@@ -347,6 +347,8 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getSiren", &CScriptVehicle::GetSiren).
 			AddMethod("setLights", &CScriptVehicle::SetLights).
 			AddMethod("getLights", &CScriptVehicle::GetLights).
+			AddMethod("setTaxiLights", &CScriptVehicle::SetTaxiLights).
+			AddMethod("getTaxiLights", &CScriptVehicle::GetTaxiLights).
 			AddMethod("setEngine", &CScriptVehicle::SetEngine).
 			AddMethod("getEngine", &CScriptVehicle::GetEngine).
 			AddMethod("setDirtLevel", &CScriptVehicle::SetDirtLevel).

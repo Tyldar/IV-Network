@@ -352,7 +352,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ZLib_files", "ZLib_files", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "Libraries\zlib-1.2.5\projects\zlib.vcxproj", "{9006D124-5D00-4CB7-BAD9-F527B19502C9}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MPLauncher", "Client\Launcher\Launcher.vcxproj", "{F96CE161-F2AD-4743-B67B-A27CDD9B1F91}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Launcher", "Client\Launcher\Launcher.vcxproj", "{F96CE161-F2AD-4743-B67B-A27CDD9B1F91}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RakNet", "Network\RakNet\RakNet.vcxproj", "{DDF93D54-0F04-4A8B-9294-906EEE6AF198}"
 EndProject

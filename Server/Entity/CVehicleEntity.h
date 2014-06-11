@@ -25,6 +25,7 @@ private:
 	bool			m_bEngineState;
 	bool			m_bSirenState;
 	bool			m_bLightsState;
+	bool			m_bTaxiLightsState;
 	int				m_iLockedState;
 	int				m_iDirtLevel;
 	float			m_fHeading;
@@ -80,6 +81,9 @@ public:
 
 	bool								GetLightsState() { return m_bLightsState; }
 	void								SetLightsState(bool bLightsState) { m_bLightsState = bLightsState; }
+
+	bool								GetTaxiLightsState() { return m_bTaxiLightsState; }
+	void								SetTaxiLightsState(bool bTaxiLightsState) { m_bTaxiLightsState = bTaxiLightsState; }
 };
 
 class CScriptVehicle : public CScriptEntity
@@ -115,7 +119,10 @@ public:
 
 	bool					GetLights() { return GetEntity()->GetLightsState(); };
 	void					SetLights(bool bLightsState);	
-	
+
+	bool					GetTaxiLights() { return GetEntity()->GetTaxiLightsState(); };
+	void					SetTaxiLights(bool bTaxiLightsState);
+
 	void					SetDirtLevel(int iDirtLevel);
 	int						GetDirtLevel() { return GetEntity()->GetDirtLevel(); };
 };

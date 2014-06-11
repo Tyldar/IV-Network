@@ -1017,6 +1017,25 @@ void SetVehicleLightsState(RakNet::BitStream * pBitStream, RakNet::Packet * pPac
 	}
 }
 
+void SetVehicleTaxiLightsState(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the vehicleid
+	EntityId vehicleId;
+	pBitStream->Read(vehicleId);
+
+	// Get a pointer to the vehicle
+	CVehicleEntity * pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId);
+
+	// Is the vehicle pointer valid?
+	if (pVehicle)
+	{
+		bool bTaxiLightsState;
+		pBitStream->Read(bTaxiLightsState);
+
+		pVehicle->SetTaxiLightsState(bTaxiLightsState);
+	}
+}
+
 void SetVehicleDirtLevel(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	// Read the vehicleid
@@ -1396,6 +1415,7 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ENGINE), SetVehicleEngineState);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN), SetVehicleSirenState);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS), SetVehicleLightsState);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_TAXI_LIGHTS), SetVehicleTaxiLightsState);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL), SetVehicleDirtLevel);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT), CreateCheckpoint);
@@ -1469,6 +1489,7 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ENGINE));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_TAXI_LIGHTS));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT));

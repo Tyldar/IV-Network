@@ -110,6 +110,16 @@ void CScriptVehicle::SetLights(bool bLightsState)
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 }
 
+void CScriptVehicle::SetTaxiLights(bool bTaxiLightsState)
+{
+	GetEntity()->SetTaxiLightsState(bTaxiLightsState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bTaxiLightsState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_TAXI_LIGHTS), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
 void CScriptVehicle::SetEngine(bool bEngineState)
 {
 	GetEntity()->SetEngineState(bEngineState);

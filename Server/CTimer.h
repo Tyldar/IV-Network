@@ -50,7 +50,7 @@ public:
 	void	SetTimer(CTimer* pTimer) { m_pTimer = pTimer; }
 
 	void Start() { GetTimer()->Start(); };
-	void Stop() { GetTimer()->Stop(); delete this; }
+	void Stop() { GetTimer()->Stop(); }
 
 	void Pause() { GetTimer()->Pause(); }
 	void Resume() { GetTimer()->Resume(); }

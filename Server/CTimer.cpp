@@ -18,7 +18,8 @@ CTimer::~CTimer()
 void CTimer::Stop()
 {
 	m_bRunning = false;
-	CServer::GetInstance()->GetTimerManager()->remove(this);
+	CServer::GetInstance()->GetTimerManager()->Remove(this);
+	delete m_pScriptTimer;
 	delete this;
 }
 
@@ -36,7 +37,7 @@ bool CTimer::Pulse()
 			pResource->GetVM()->Call(m_callback);
 
 
-		m_uiLastPulse = SharedUtility::GetTime();
+		m_uiLastPulse = uiNow;
 
 		if (m_iRepeatings > 0)
 		{

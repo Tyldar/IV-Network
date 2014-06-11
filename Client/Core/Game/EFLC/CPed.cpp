@@ -129,10 +129,7 @@ bool CPed::IsDucking()
 
 bool CPed::IsInVehicle()
 {
-	if (GetPed())
-		return ((GetPed()->m_byteUnknown & 4) != 0);
-
-	return false;
+	return EFLC::CScript::IsCharInAnyCar(g_pCore->GetGame()->GetPools()->GetPedPool()->HandleOf(GetPed()));
 }
 
 void CPed::SetCurrentVehicle(IVehicle * pVehicle)

@@ -67,6 +67,10 @@ CServer::~CServer()
 	SAFE_DELETE(m_pBlipManager);
 
 	SAFE_DELETE(m_pCheckpointManager);
+
+	SAFE_DELETE(m_pTimerManager);
+
+	SAFE_DELETE(m_pNetworkModule);
 }
 
 void OnCreateVM(IScriptVM* pVM)
