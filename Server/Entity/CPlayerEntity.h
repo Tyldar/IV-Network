@@ -151,6 +151,9 @@ public:
 
 	void		SetMatrix(Matrix &matrix) { m_Matrix = matrix; }
 	void		GetMatrix(Matrix &matrix) { matrix = m_Matrix; }
+
+	void		Kick();
+	int			GetPing();
 };
 
 
@@ -235,8 +238,8 @@ public:
 
 	void 		TriggerPlayerEvent(CString eventName);
 
-	void		Kick();
-	int			GetPing();
+	void		Kick() { GetEntity()->Kick(); }
+	int			GetPing() { return GetEntity()->GetPing(); }
 };
 
 #endif // CPlayerEntity_h

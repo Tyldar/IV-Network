@@ -351,6 +351,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getTaxiLights", &CScriptVehicle::GetTaxiLights).
 			AddMethod("setEngine", &CScriptVehicle::SetEngine).
 			AddMethod("getEngine", &CScriptVehicle::GetEngine).
+			AddMethod("getHorn", &CScriptVehicle::GetHorn).
 			AddMethod("setDirtLevel", &CScriptVehicle::SetDirtLevel).
 			AddMethod("getDirtLevel", &CScriptVehicle::GetDirtLevel);
 		(pScriptVehicle)->Register(pVM);

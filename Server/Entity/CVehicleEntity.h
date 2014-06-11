@@ -25,6 +25,7 @@ private:
 	bool			m_bEngineState;
 	bool			m_bSirenState;
 	bool			m_bLightsState;
+	bool			m_bHornState;
 	bool			m_bTaxiLightsState;
 	int				m_iLockedState;
 	int				m_iDirtLevel;
@@ -82,6 +83,9 @@ public:
 	bool								GetLightsState() { return m_bLightsState; }
 	void								SetLightsState(bool bLightsState) { m_bLightsState = bLightsState; }
 
+	bool								GetHornState() { return m_bHornState; }
+	void								SetHornState(bool bHornState) { m_bLightsState = bHornState; }
+
 	bool								GetTaxiLightsState() { return m_bTaxiLightsState; }
 	void								SetTaxiLightsState(bool bTaxiLightsState) { m_bTaxiLightsState = bTaxiLightsState; }
 };
@@ -122,6 +126,8 @@ public:
 
 	bool					GetTaxiLights() { return GetEntity()->GetTaxiLightsState(); };
 	void					SetTaxiLights(bool bTaxiLightsState);
+
+	bool					GetHorn() { return GetEntity()->GetHornState(); };
 
 	void					SetDirtLevel(int iDirtLevel);
 	int						GetDirtLevel() { return GetEntity()->GetDirtLevel(); };

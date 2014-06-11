@@ -137,6 +137,8 @@ bool CServer::Startup()
 		
 	CLogFile::Printf(" Max Players: %d", CVAR_GET_INTEGER("maxplayers"));
 
+	CLogFile::Printf(" Namesakes: %d", CVAR_GET_BOOL("namesakes"));
+
 #ifdef _WIN32
         SetConsoleTextAttribute((HANDLE)GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         CLogFile::Print("====================================================================");

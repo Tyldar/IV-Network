@@ -108,6 +108,21 @@ void CLocalPlayer::HandleSpawn()
 
 	// Set first spawn
 	m_bFirstSpawn = true;
+
+	CVehicleEntity * pVehicle;
+	// Loop through all current vehicles
+	for (int i = 0; i < g_pCore->GetGame()->GetVehicleManager()->GetMax(); i++)
+	{
+		if (!g_pCore->GetGame()->GetVehicleManager()->DoesExists(i)) continue;
+		// Get a pointer to this vehicle
+		pVehicle = g_pCore->GetGame()->GetVehicleManager()->GetAt(i);
+
+		// if vehicle isn't spawned, we must to spawn it
+		if (pVehicle && !pVehicle->IsSpawned())
+		{
+			pVehicle->Create();
+		}
+	}
 }
 
 void CLocalPlayer::DoDeathCheck()

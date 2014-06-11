@@ -72,7 +72,7 @@ public:
 
 	void									Call(const char * szIdentifier, RakNet::BitStream * pBitStream, PacketPriority priority, PacketReliability reliability, EntityId playerId, bool bBroadCast );
 	int										GetPlayerPing(EntityId playerId );
-	void									KickPlayer(EntityId playerId);
+	void									KickPlayer(EntityId playerId, bool sendDisconnectNotification);
 
 	RakNet::RakPeerInterface				* GetRakPeer(void ) { return m_pRakPeer; }
 	RakNet::RPC4							* GetRPC(void ) { return m_pRPC; }

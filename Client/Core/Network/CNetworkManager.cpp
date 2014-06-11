@@ -314,7 +314,7 @@ void CNetworkManager::ConnectionAccepted(RakNet::Packet * pPacket)
 	RakNet::BitStream pBitStream;
 
 	// Write the network version
-	pBitStream.Write(NETWORK_VERSION);
+	pBitStream.Write(MOD_VERSION_NUMBER);
 
 	g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_INITIAL_DATA), &pBitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
 }

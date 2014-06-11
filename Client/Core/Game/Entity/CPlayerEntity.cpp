@@ -253,9 +253,8 @@ CPlayerEntity::~CPlayerEntity()
 unsigned short CPlayerEntity::GetPing()
 {
 	if(IsLocalPlayer())
-	{
-		//TODO: Get ping to current connected server.
-		return -1;
+	{	
+		return g_pCore->GetGame()->GetLocalPlayer()->GetPing();
 	}
 	else
 		return m_usPing;
@@ -756,6 +755,11 @@ void CPlayerEntity::SetModel(int iModelId)
 
 	m_pModelInfo->RemoveReference();
 	m_pModelInfo = pModelInfo;
+
+
+	//fix: no more random clothes
+	for (int i = 0; i < 11; ++i)
+		SetClothes(i, 0);
 
 	if(IsSpawned())
 	{
@@ -1689,8 +1693,9 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		VehiclePacket.vehHealth = m_pVehicle->GetHealth();
 		//VehiclePacket. = m_pVehicle->GetPetrolTankHealth();
 		VehiclePacket.bEngineState = m_pVehicle->GetEngineState();
-		VehiclePacket.bSirenState = EFLC::CScript::IsCarSirenOn(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(m_pVehicle->GetGameVehicle()->GetVehicle()));
+		VehiclePacket.bSirenState = m_pVehicle->GetSirenState();
 		VehiclePacket.bLightsState = m_pVehicle->GetGameVehicle()->GetHeadlights();
+		VehiclePacket.bHornState = EFLC::CScript::IsPlayerPressingHorn(g_pCore->GetGame()->GetLocalPlayer()->GetScriptingHandle());
 		VehiclePacket.playerArmor = GetArmour();
 		VehiclePacket.playerHealth = GetHealth();
 		VehiclePacket.weapon.iAmmo = m_pPlayerWeapons->GetAmmo(m_pPlayerWeapons->GetCurrentWeapon());
@@ -1710,7 +1715,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		PassengerPacket.playerHealth = GetHealth();
 		GetPosition(PassengerPacket.vecPosition);
 		PassengerPacket.vehicleId = m_pVehicle->GetId();
-		//PassengerPacket.byteSeatId = m_byteSeat;
+		PassengerPacket.byteSeatId = GetSeat();
 		
 		pBitStream->Write(RPC_PACKAGE_TYPE_PLAYER_PASSENGER);
 		pBitStream->Write(PassengerPacket);
@@ -1821,9 +1826,11 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 				m_pVehicle->SetTurnSpeed(VehiclePacket.vecTurnSpeed);
 				m_pVehicle->SetHealth(VehiclePacket.vehHealth);
 				//m_pVehicle->SetPetrolTankHealth(VehiclePacket.petrol);
-				m_pVehicle->SetEngineState(VehiclePacket.bEngineState);
-				m_pVehicle->SetSirenState(VehiclePacket.bSirenState);
-				m_pVehicle->GetGameVehicle()->SetHeadlights(VehiclePacket.bLightsState);
+
+				if (VehiclePacket.bEngineState != m_pVehicle->GetEngineState()) m_pVehicle->SetEngineState(VehiclePacket.bEngineState);
+				if (VehiclePacket.bSirenState != m_pVehicle->GetSirenState()) m_pVehicle->SetSirenState(VehiclePacket.bSirenState);
+				m_pVehicle->SoundHorn(500 * VehiclePacket.bHornState);
+				if (VehiclePacket.bLightsState != m_pVehicle->GetGameVehicle()->GetHeadlights()) m_pVehicle->GetGameVehicle()->SetHeadlights(VehiclePacket.bLightsState);
 
 				SetArmour(VehiclePacket.playerArmor);
 				SetHealth(VehiclePacket.playerHealth);

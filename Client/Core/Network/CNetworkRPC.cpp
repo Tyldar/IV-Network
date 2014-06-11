@@ -116,47 +116,47 @@ void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	EFLC::CScript::DoScreenFadeOutUnhacked(0);
 }
 
-void GetPlayer(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+void GetPlayers(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	// Read the playerid
 	EntityId playerId;
-	pBitStream->Read(playerId);
-
-	if (playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId()) return;
-
-	// Read the player name
 	RakNet::RakString _strName;
-	pBitStream->Read(_strName);
-	CString strPlayerName(_strName.C_String());
-
 	unsigned int uiColor;
-	pBitStream->Read(uiColor);
-
-	// Add the player
-	CPlayerEntity * pEntity = new CPlayerEntity;
-
+	CPlayerEntity * pEntity;
 	int playerModel;
 
-	pBitStream->Read(playerModel);
-
-	pEntity->SetModel(playerModel);
-
-	int playerClothes;
-
-	for (int i = 0; i < 11; i++)
+	while (pBitStream->Read(playerId))
 	{
-		pBitStream->Read(playerClothes);
 
-		pEntity->SetClothes(i, playerClothes);
+		if (playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId()) return;
+
+		// Read the player name
+		pBitStream->Read(_strName);
+		CString strPlayerName(_strName.C_String());
+
+		pBitStream->Read(uiColor);
+
+		pBitStream->Read(playerModel);
+
+		// Add the player
+		pEntity = new CPlayerEntity;
+
+		pEntity->SetModel(playerModel);	
+
+		pEntity->Create();
+		pEntity->SetNick(strPlayerName);
+		pEntity->SetId(playerId);
+		pEntity->SetColor(uiColor);
+
+		//for (unsigned char i = 0; i < 11; i++)
+		//{
+		//	pBitStream->Read(playerModel);
+		//	pEntity->SetClothes(i, playerModel);
+		//}
+
+		// Notify the playermanager that we're having a new player
+		g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
 	}
-
-	pEntity->Create();
-	pEntity->SetNick(strPlayerName);
-	pEntity->SetId(playerId);
-	pEntity->SetColor(uiColor);
-
-	// Notify the playermanager that we're having a new player
-	g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
 }
 
 void PlayerJoin(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -703,51 +703,71 @@ void TriggerPlayerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 	CEvents::GetInstance()->Call(eventName.C_String(), &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
 }
 
-void GetVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+void KickNotification(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+
+	int reason;
+	pBitStream->Read(reason);
+
+	if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your name is used on server.");
+	else if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your version differs from server version.");
+}
+
+void GetVehicles(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	EntityId vehicleId;
-	pBitStream->Read(vehicleId);
-
 	int vehicleModel;
-	pBitStream->Read(vehicleModel);
-
 	CVector3 vecPosition;
-	pBitStream->Read(vecPosition);
-	vecPosition.fZ += 0.4f;
-
 	CVector3 vecRotation;
-	pBitStream->Read(vecRotation);
-
-	float vecHealth;
-	pBitStream->Read(vecHealth);
-
+	float fHealth;
+	bool engine;
+	bool lights;
+	bool siren;
+	bool taxilights;
 	DWORD color1;
-	pBitStream->Read(color1);
-
 	DWORD color2;
-	pBitStream->Read(color2);
-
 	DWORD color3;
-	pBitStream->Read(color3);
-
 	DWORD color4;
-	pBitStream->Read(color4);
-
 	DWORD color5;
-	pBitStream->Read(color5);
+	CVehicleEntity * pVehicle;
 
-	CVehicleEntity * pVehicle = new CVehicleEntity(vehicleModel, vecPosition, vecRotation.fX, color1, color2, color3, color4, color5);
-	g_pCore->GetGraphics()->GetChat()->Print(CString("%f, %f, %f, %f, %f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ, vecRotation.fX, vecRotation.fY, vecRotation.fZ, vecHealth));
-	CLogFile::Printf("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ);
-	if (pVehicle)
+	while (pBitStream->Read(vehicleId))
 	{
-		//	// Add our vehicle
-		g_pCore->GetGame()->GetVehicleManager()->Add(vehicleId, pVehicle);
-		pVehicle->SetId(vehicleId);
-		pVehicle->Create();
-		pVehicle->SetPosition(vecPosition, true);
-		pVehicle->SetRotation(vecRotation, true);
-		pVehicle->SetHealth(vecHealth);
+		pBitStream->Read(vehicleModel);
+
+		pBitStream->Read(vecPosition);
+		vecPosition.fZ += 0.4f;
+
+		pBitStream->Read(vecRotation);
+
+		pBitStream->Read(fHealth);
+		pBitStream->Read(engine);
+		pBitStream->Read(lights);
+		pBitStream->Read(siren);
+		pBitStream->Read(taxilights);
+
+		pBitStream->Read(color1);
+		pBitStream->Read(color2);
+		pBitStream->Read(color3);
+		pBitStream->Read(color4);
+		pBitStream->Read(color5);
+
+		pVehicle = new CVehicleEntity(vehicleModel, vecPosition, vecRotation.fX, color1, color2, color3, color4, color5);
+		g_pCore->GetGraphics()->GetChat()->Print(CString("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ));
+		CLogFile::Printf("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ);
+		if (pVehicle)
+		{
+			//	// Add our vehicle
+			g_pCore->GetGame()->GetVehicleManager()->Add(vehicleId, pVehicle);
+			pVehicle->SetId(vehicleId);
+			pVehicle->SetPosition(vecPosition);
+			pVehicle->SetRotation(vecRotation);
+			pVehicle->SetHealth(fHealth);
+			pVehicle->SetEngineState(engine);
+			pVehicle->SetLightsState(lights);
+			pVehicle->SetSirenState(siren);
+			pVehicle->SetTaxiLightsState(taxilights);
+		}
 	}
 }
 
@@ -1073,6 +1093,36 @@ void DownloadStart(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	g_pCore->GetResourceManager()->SetResourceDirectory(strPath);
 }
 
+void GetCheckpoints(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	EntityId checkpointId;
+	int iType;
+	CVector3 vecPosition;
+	CVector3 vecTargetPosition;
+	float fRadius;
+	CCheckpointEntity * pCheckpoint;
+
+	while (pBitStream->Read(checkpointId))
+	{
+		pBitStream->Read(iType);
+
+		pBitStream->Read(vecPosition);
+
+		pBitStream->Read(vecTargetPosition);
+
+		pBitStream->Read(fRadius);
+
+		pCheckpoint = new CCheckpointEntity((EFLC::CScript::eCheckpointType)iType, vecPosition, vecTargetPosition, fRadius);
+		if (pCheckpoint)
+		{
+			g_pCore->GetGame()->GetCheckpointManager()->Add(checkpointId, pCheckpoint);
+			pCheckpoint->SetId(checkpointId);
+			pCheckpoint->Create();
+			pCheckpoint->Show();
+		}
+	}
+}
+
 void CreateCheckpoint(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	EntityId checkpointId;
@@ -1205,6 +1255,32 @@ void SetCheckpointRadius(RakNet::BitStream * pBitStream, RakNet::Packet * pPacke
 		pBitStream->Read(fRadius);
 
 		pCheckpoint->SetRadius(fRadius);
+	}
+}
+
+void GetBlips(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	EntityId blipId;
+	unsigned int uiIcon;
+	CVector3 vecPosition;
+	bool bRange;
+	CBlipEntity * pBlip;
+
+	while (pBitStream->Read(blipId))
+	{
+		pBitStream->Read(uiIcon);
+
+		pBitStream->Read(vecPosition);
+
+		pBitStream->Read(bRange);
+
+		pBlip = new CBlipEntity((EFLC::CScript::eBlipSprite)uiIcon, vecPosition, bRange);
+		if (pBlip)
+		{
+			g_pCore->GetGame()->GetBlipManager()->Add(blipId, pBlip);
+			pBlip->SetId(blipId);
+			pBlip->Create();
+		}
 	}
 }
 
@@ -1378,8 +1454,10 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_SYNC_PACKAGE), RecieveSyncPackage);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CREATE_VEHICLE), CreateVehicle);
 
-		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLE), GetVehicle);
-		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_PLAYER), PlayerJoin);//GetPlayer
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLES), GetVehicles);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_PLAYERS), GetPlayers);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_CHECKPOINTS), GetCheckpoints);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_BLIPS), GetBlips);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE), EnterVehicle);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE), ExitVehicle);
@@ -1405,6 +1483,7 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_SPAWN), SpawnPlayer);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_SET_HUD_VISIBLE), SetPlayerHudElementVisible);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), TriggerPlayerEvent);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_KICK_NOTIFICATION), KickNotification);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_POSITION), SetVehiclePosition);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ROTATION), SetVehicleRotation);
@@ -1453,8 +1532,10 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_SYNC_PACKAGE));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CREATE_VEHICLE));
 
-		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLE));
-		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_PLAYER));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLES));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_PLAYERS));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_CHECKPOINTS));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_BLIPS));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE));

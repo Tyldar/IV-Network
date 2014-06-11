@@ -73,6 +73,7 @@ namespace CScript
 	static bool IsPlayerBeingArrested() { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_BEING_ARRESTED); }
 	static bool IsPlayerPlaying(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_PLAYING, playerIndex); }
 	static bool IsPlayerFreeForAmbientTask(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_FREE_FOR_AMBIENT_TASK, playerIndex); }
+	static bool IsPlayerPressingHorn(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_PRESSING_HORN, playerIndex); }
 
 	// Char
 	static bool DoesCharExist(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_DOES_CHAR_EXIST, ped); }
@@ -206,6 +207,7 @@ namespace CScript
 	static void GetVehicleQuaternion(unsigned int vehicle, float * rX, float * rY, float * rZ, float * rW) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_GET_VEHICLE_QUATERNION, vehicle, rX, rY, rZ, rW); }
 	static bool IsCarSirenOn(unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CAR_SIREN_ON, vehicle); }
 	static void SwitchCarSiren(unsigned int vehicle, bool state) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SWITCH_CAR_SIREN, vehicle, state); }
+	static void SoundCarHorn(unsigned int vehicle, int duration = 1500) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SOUND_CAR_HORN, vehicle, duration); }
 
 	// Sound
 	static unsigned int RequestAmbientAudioBank(const char* szAudio) { return EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_REQUEST_AMBIENT_AUDIO_BANK, szAudio); }

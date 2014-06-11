@@ -228,6 +228,17 @@ void CPlayerEntity::SetPosition(const CVector3& vecPosition)
 	}
 }
 
+int  CPlayerEntity::GetPing()
+{
+	return CServer::GetInstance()->GetNetworkModule()->GetPlayerPing(GetId());
+}
+
+
+void CPlayerEntity::Kick()
+{
+	CServer::GetInstance()->GetNetworkModule()->KickPlayer(GetId(), true);
+}
+
 
 void CScriptPlayer::SetPosition(float fX, float fY, float fZ)
 {
@@ -424,17 +435,6 @@ void CScriptPlayer::Spawn(float fX, float fY, float fZ, float fA)
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_SPAWN), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, GetEntity()->GetId(), false);
 }
 
-int  CScriptPlayer::GetPing()
-{
-	return CServer::GetInstance()->GetNetworkModule()->GetPlayerPing(GetEntity()->GetId());
-}
-
-
-void CScriptPlayer::Kick()
-{
-	CServer::GetInstance()->GetNetworkModule()->KickPlayer(GetEntity()->GetId());
-}
-
 void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream, ePackageType pType)
 {
 	switch (pType)
@@ -502,6 +502,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream, ePackageType pType
 				VehiclePacket.bEngineState = pVehicle->GetEngineState();
 				VehiclePacket.bSirenState = pVehicle->GetSirenState();
 				VehiclePacket.bLightsState = pVehicle->GetLightsState();
+				VehiclePacket.bLightsState = pVehicle->GetHornState();
 				VehiclePacket.fHeading = pVehicle->GetHeading();
 				VehiclePacket.playerArmor = GetArmour();
 				VehiclePacket.playerHealth = GetHealth();
@@ -589,6 +590,8 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 				pVehicle->SetEngineState(VehiclePacket.bEngineState);
 				pVehicle->SetSirenState(VehiclePacket.bSirenState);
 				pVehicle->SetLightsState(VehiclePacket.bLightsState);
+				pVehicle->SetHornState(VehiclePacket.bHornState);
+
 				pVehicle->SetHeading(VehiclePacket.fHeading);
 
 				SetHealth(VehiclePacket.playerHealth);
@@ -626,7 +629,7 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 			SetHealth(PassengerPacket.playerHealth);
 
 			m_vehicleId = PassengerPacket.vehicleId;
-			//m_vehicleSeatId = PassengerPacket.byteSeatId;
+			m_vehicleSeatId = PassengerPacket.byteSeatId;
 
 			m_eLastSyncPackageType = pType;
 			m_ulLastSyncReceived = SharedUtility::GetTime();

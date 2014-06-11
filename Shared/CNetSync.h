@@ -51,7 +51,10 @@ enum eDisconnectReason
 {
 	REASON_DISCONNECT,
 	REASON_TIMEOUT,
-	REASON_KICKED
+	REASON_KICKED,
+
+	REASON_NAME_IS_USED,
+	REASON_BAD_VERSION
 };
 
 enum eNetworkState
@@ -132,9 +135,10 @@ public:
 	float						playerHealth;
 	float						playerArmor;
 	float						fHeading;
-	bool						bEngineState;
-	bool						bSirenState;
-	bool						bLightsState;
+	bool						bHornState : 1;
+	bool						bEngineState : 1;
+	bool						bSirenState : 1;	
+	bool						bLightsState : 1;
 	CSyncWeapon					weapon;
 };
 

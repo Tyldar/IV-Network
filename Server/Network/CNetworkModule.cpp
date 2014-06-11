@@ -139,9 +139,9 @@ int CNetworkModule::GetPlayerPing(EntityId playerId)
 	return m_pRakPeer->GetLastPing(m_pRakPeer->GetSystemAddressFromIndex(playerId));
 }
 
-void CNetworkModule::KickPlayer(EntityId playerId)
+void CNetworkModule::KickPlayer(EntityId playerId, bool sendDisconnectNotification)
 {
-	m_pRakPeer->CloseConnection(m_pRakPeer->GetSystemAddressFromIndex(playerId), true, 0, HIGH_PRIORITY);
+	m_pRakPeer->CloseConnection(m_pRakPeer->GetSystemAddressFromIndex(playerId), sendDisconnectNotification, 0, HIGH_PRIORITY);
 }
 
 void CNetworkModule::UpdateNetwork(void)
