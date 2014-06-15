@@ -168,7 +168,7 @@ bool CVehicleEntity::Create()
 		SetPosition(m_vecSpawnPosition);
 		SetRotation(m_vecRotation);
 		SetEngineState(GetEngineState());
-		SetLightsState(GetLightsState());
+		m_pVehicle->SetHeadlights(GetLightsState());
 		if (GetSirenState()) SetSirenState(true);
 		if (GetTaxiLightsState()) SetTaxiLightsState(true);
 

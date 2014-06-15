@@ -1790,7 +1790,7 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 	{
 		CNetworkPlayerVehicleSyncPacket VehiclePacket;
 		pBitStream->Read(VehiclePacket);
-
+		if (!g_pCore->GetGame()->GetVehicleManager()->GetAt(VehiclePacket.vehicleId)->IsSpawned()) return;
 #ifdef SYNC_TEST
 		VehiclePacket.vehicleId += 1;
 #endif
@@ -1871,6 +1871,8 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 
 		CNetworkPlayerPassengerSyncPacket PassengerPacket;
 		pBitStream->Read(PassengerPacket);
+
+		if (!g_pCore->GetGame()->GetVehicleManager()->GetAt(PassengerPacket.vehicleId)->IsSpawned()) return;
 
 		SetPosition(PassengerPacket.vecPosition);
 		SetControlState(&PassengerPacket.ControlState);
