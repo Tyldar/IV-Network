@@ -312,6 +312,8 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getWantedLevel", &CScriptPlayer::GetWantedLevel). // Synced
 			AddMethod("setWantedLevel", &CScriptPlayer::SetWantedLevel). // Synced
 			AddMethod("giveWeapon", &CScriptPlayer::GiveWeapon). // Synced
+			AddMethod("getWeaponType", &CScriptPlayer::GetWeaponType). // Synced
+			AddMethod("getWeaponAmmo", &CScriptPlayer::GetWeaponAmmo). // Synced
 			AddMethod("giveMoney", &CScriptPlayer::GiveMoney). // Synced
 			AddMethod("setColor", &CScriptPlayer::SetColor). // Synced
 			AddMethod("getColor", &CScriptPlayer::GetColor). // Synced
@@ -322,8 +324,12 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getClothes", &CScriptPlayer::GetClothes). // Synced	
 			AddMethod("isOnFoot", &CScriptPlayer::IsOnFoot).
 			AddMethod("spawn", &CScriptPlayer::Spawn).
+			AddMethod("kill", &CScriptPlayer::Kill).
+			AddMethod("isSpawned", &CScriptPlayer::IsSpawned).
 			AddMethod("getVehicle", &CScriptPlayer::GetVehicle).
 			AddMethod("getVehicleSeat", &CScriptPlayer::GetVehicleSeat).
+			AddMethod("putIntoVehicle", &CScriptPlayer::PutIntoVehicle).
+			AddMethod("removeFromVehicle", &CScriptPlayer::RemoveFromVehicle).
 			AddMethod("getSerial", &CScriptPlayer::GetSerial).
 			AddMethod("getPing", &CScriptPlayer::GetPing).
 			AddMethod("kick", &CScriptPlayer::Kick).

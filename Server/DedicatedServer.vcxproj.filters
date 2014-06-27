@@ -399,6 +399,12 @@
     <ClCompile Include="CTimerManager.cpp">
       <Filter>Source Files\Scripting</Filter>
     </ClCompile>
+    <ClCompile Include="..\Shared\CLibrary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Shared\Network\CHttpClient.cpp">
+      <Filter>Source Files\Shared\Network</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CServer.h">
@@ -619,6 +625,12 @@
     </ClInclude>
     <ClInclude Include="..\Shared\Scripting\IScriptVM.h">
       <Filter>Header Files\Shared\Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\CLibrary.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Shared\Network\CHttpClient.h">
+      <Filter>Header Files\Shared\Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

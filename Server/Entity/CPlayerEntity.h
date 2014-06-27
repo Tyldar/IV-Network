@@ -21,8 +21,7 @@ class CScriptPlayer;
 class CVehicleEntity;
 class CPlayerEntity : public CNetworkEntity
 {
-friend void VehicleEnter(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket);
-friend void VehicleExit(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket);
+
 private:
 	unsigned long m_ulLastSyncReceived;
 	unsigned long m_ulLastSyncSent;
@@ -63,6 +62,8 @@ private:
 	CScriptPlayer*	m_pScriptPlayer;
 	EntityId		m_vehicleId;
 	unsigned char	m_vehicleSeatId;
+
+	bool			m_bIsSpawned;
 
 	Matrix			m_Matrix;
 
@@ -143,14 +144,21 @@ public:
 	void		Serialize(RakNet::BitStream * bitStream, ePackageType pType);
 	void		Deserialize(RakNet::BitStream * bitStream, ePackageType pType);
 
-	CVehicleEntity* GetVehicle();
+	void		SetVehicleId(EntityId vehicleId) { m_vehicleId = vehicleId; }
+	CVehicleEntity* GetVehicle();	
 	
+	void		SetVehicleSeat(unsigned char vehicleSeatId) { m_vehicleSeatId = vehicleSeatId; }
 	int 		GetVehicleSeat() { return m_vehicleSeatId; }
 
 	void		GiveWeapon(int id, int uiAmmo);
+	char		GetWeaponType() { return m_Weapon.weaponType; }
+	int			GetWeaponAmmo() { return m_Weapon.iAmmo; }
 
 	void		SetMatrix(Matrix &matrix) { m_Matrix = matrix; }
 	void		GetMatrix(Matrix &matrix) { matrix = m_Matrix; }
+
+	void		SetSpawned(bool bIsSpawned) { m_bIsSpawned = bIsSpawned; }
+	bool		IsSpawned() { return m_bIsSpawned; }
 
 	void		Kick();
 	int			GetPing();
@@ -167,47 +175,39 @@ public:
 
 	virtual const char* GetScriptClassName() { return "CPlayerEntity"; }
 
-	void  SetArmour(float fArmour);
+	void		SetArmour(float fArmour);
+	float		GetArmour(void) { return GetEntity()->GetArmour(); }
 
-	float GetArmour(void) { return GetEntity()->GetArmour(); }
+	void		SetColor(DWORD dwColor);
 
-	void  SetColor(DWORD dwColor);
+	DWORD		GetColor(void) { return GetEntity()->GetColor(); }
 
-	DWORD GetColor(void) { return GetEntity()->GetColor(); }
-
-	void  SetHeading(float fHeading);
-
-	float GetHeading() { return GetEntity()->GetHeading(); }
+	void		SetHeading(float fHeading);
+	float		GetHeading() { return GetEntity()->GetHeading(); }
 
 	void		SetName(CString szName);
+	CString		GetName() { return GetEntity()->GetName(); }
 
-	CString GetName() { return GetEntity()->GetName(); }
+	CString		GetSerial() { return GetEntity()->GetSerial(); }
 
-	CString GetSerial() { return GetEntity()->GetSerial(); }
-
-	void SetModel(int iModel);
-
-	int GetModel() { return GetEntity()->GetModel(); }
-
-	void SetMoney(int iMoney);
+	void		SetModel(int iModel);
+	int			GetModel() { return GetEntity()->GetModel(); }
 	
-	void SetClothes(int iPart, int iClothes);
-	int  GetClothes(int iPart) { return GetEntity()->GetClothes(iPart) ; }
+	void		SetClothes(int iPart, int iClothes);
+	int			GetClothes(int iPart) { return GetEntity()->GetClothes(iPart) ; }
 
-	int	GetMoney() { return GetEntity()->GetMoney(); }
+	void		SetMoney(int iMoney);
+	int			GetMoney() { return GetEntity()->GetMoney(); }
+	void		GiveMoney(int iMoney);
 
-	void GiveMoney(int iMoney);
-
-	void		 SetDimension(int iDimension);
-
+	void		SetDimension(int iDimension);
 	unsigned int GetDimension() { return GetEntity()->GetDimension(); }
 
 	void		SetWantedLevel(int iWantedLevel);
+	int			GetWantedLevel() { return GetEntity()->GetWantedLevel(); }
 
-	int GetWantedLevel() { return GetEntity()->GetWantedLevel(); }
-
-	float		 GetHealth() { return GetEntity()->GetHealth(); }
-	void		 SetHealth(float fHealth);
+	float		GetHealth() { return GetEntity()->GetHealth(); }
+	void		SetHealth(float fHealth);
 
 	void		SetPosition(float fX, float fY, float fZ);
 	CVector3	GetPosition() { CVector3 vecPos; if (IsOnFoot()) GetEntity()->GetPosition(vecPos); else GetVehicle()->GetPosition(vecPos); return vecPos; }
@@ -226,13 +226,19 @@ public:
 	int			GetId() { return GetEntity()->GetId(); }
 
 	bool		IsOnFoot() { return GetVehicle() == nullptr ? true : false; }
-	void		GiveWeapon(int id, int uiAmmo);
 
-	CVehicleEntity* GetVehicle() { return GetEntity()->GetVehicle(); }
-	
+	void		GiveWeapon(int id, int uiAmmo);
+	char		GetWeaponType() { return GetEntity()->GetWeaponType(); }
+	int			GetWeaponAmmo() { return GetEntity()->GetWeaponAmmo(); }
+
+	CVehicleEntity* GetVehicle() { return GetEntity()->GetVehicle(); }	
 	int 		GetVehicleSeat() { return GetEntity()->GetVehicleSeat(); }
+	void		PutIntoVehicle(CScriptVehicle * pVehicle, unsigned char byteSeatId);
+	void		RemoveFromVehicle();
 
 	void		Spawn(float fX, float fY, float fZ, float fA);
+	void		Kill();
+	bool		IsSpawned() { return GetEntity()->IsSpawned(); }
 	
 	void 		SetHudElementVisible(int componentid, bool visible);
 

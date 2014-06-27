@@ -76,6 +76,7 @@ namespace CScript
 	static bool IsPlayerPressingHorn(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_PRESSING_HORN, playerIndex); }
 
 	// Char
+	static void TaskDie(unsigned int ped) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_TASK_DIE, ped); }
 	static bool DoesCharExist(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_DOES_CHAR_EXIST, ped); }
 	static bool IsPedInCover(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PED_IN_COVER, ped); }
 	static void GiveWeaponToChar(unsigned int ped, eWeapon weapon, unsigned int ammo, bool unknown0) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_GIVE_WEAPON_TO_CHAR, ped, weapon, ammo, unknown0); }
@@ -84,6 +85,7 @@ namespace CScript
 
 	static bool IsCharInjured(unsigned int ped) { return false; }
 	static bool IsCharInAnyCar(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CHAR_IN_ANY_CAR, ped); }
+	static bool IsCharInCar(unsigned int ped, unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CHAR_IN_ANY_CAR, ped, vehicle); }
 	static void BlockPedWeaponSwitching(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_BLOCK_PED_WEAPON_SWITCHING, ped, value); }
 	static void UnlockRagdoll(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_UNLOCK_RAGDOLL, ped, value); }
 	static void SetBlockingOfNonTemporaryEvents(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, ped, value); }

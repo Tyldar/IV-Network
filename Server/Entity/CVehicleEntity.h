@@ -84,7 +84,7 @@ public:
 	void								SetLightsState(bool bLightsState) { m_bLightsState = bLightsState; }
 
 	bool								GetHornState() { return m_bHornState; }
-	void								SetHornState(bool bHornState) { m_bLightsState = bHornState; }
+	void								SetHornState(bool bHornState) { m_bHornState = bHornState; }
 
 	bool								GetTaxiLightsState() { return m_bTaxiLightsState; }
 	void								SetTaxiLightsState(bool bTaxiLightsState) { m_bTaxiLightsState = bTaxiLightsState; }

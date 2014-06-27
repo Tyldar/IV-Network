@@ -183,7 +183,7 @@ void CLocalPlayer::CheckVehicleEnterExit()
 	{
 
 		// Are we not in a vehicle?
-		if (!InternalIsInVehicle())
+		if (!InternalIsInAnyVehicle())
 		{
 			if (m_pVehicleEnterExit->bEntering)
 			{
@@ -275,7 +275,7 @@ void CLocalPlayer::ProcessVehicleEnterExit()
 	if (IsSpawned())
 	{
 		// Are we internally in a vehicle?
-		if (InternalIsInVehicle())
+		if (InternalIsInAnyVehicle())
 		{
 			// Are we flagged as entering a vehicle?
 			if (m_pVehicleEnterExit->bEntering)

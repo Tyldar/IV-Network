@@ -328,7 +328,6 @@ void SetPlayerName(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 		// Assign the new name to the player
 		RakNet::RakString strName;
 		pBitStream->Read(strName);
-		g_pCore->GetGraphics()->GetChat()->Print(CString("%s is now called %s", pPlayer->GetNick().Get(), strName.C_String()));
 		pPlayer->SetNick(strName.C_String());
 	}
 }
@@ -695,7 +694,6 @@ void SetPlayerHudElementVisible(RakNet::BitStream * pBitStream, RakNet::Packet *
 
 void TriggerPlayerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-
 	RakNet::RakString eventName;
 	pBitStream->Read(eventName);
 
@@ -705,12 +703,27 @@ void TriggerPlayerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 
 void KickNotification(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
-
 	int reason;
 	pBitStream->Read(reason);
 
 	if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your name is used on server.");
 	else if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your version differs from server version.");
+}
+
+void PlayerDeath(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the playerid
+	EntityId playerId;
+	pBitStream->Read(playerId);
+
+	// Get a pointer to the vehicle
+	CPlayerEntity * pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId);
+
+	// Is the player pointer valid?
+	if (pPlayer)
+	{
+		EFLC::CScript::TaskDie(pPlayer->GetScriptingHandle());
+	}	
 }
 
 void GetVehicles(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -815,15 +828,12 @@ void CreateVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	}
 }
 
-void EnterVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+void PutIntoVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	EntityId playerId;
 	pBitStream->Read(playerId);
 
 	if (!g_pCore->GetGame()->GetPlayerManager()->DoesExists(playerId))
-		return;
-
-	if (g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->IsLocalPlayer())
 		return;
 
 	EntityId vehicleId;
@@ -835,7 +845,7 @@ void EnterVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	byte byteSeat;
 	pBitStream->Read(byteSeat);
 
-	if(g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->IsInVehicle())
+	if(g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->IsInAnyVehicle())
 		g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->RemoveFromVehicle();
 
 
@@ -843,7 +853,7 @@ void EnterVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->EnterVehicle(g_pCore->GetGame()->GetVehicleManager()->GetAt(vehicleId), byteSeat);
 }
 
-void ExitVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+void RemoveFromVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	EntityId playerId;
 	pBitStream->Read(playerId);
@@ -851,17 +861,8 @@ void ExitVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	if (!g_pCore->GetGame()->GetPlayerManager()->DoesExists(playerId))
 		return;
 
-	if (g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->IsLocalPlayer())
+	if (!g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->IsInAnyVehicle())
 		return;
-
-	EntityId vehicleId;
-	pBitStream->Read(vehicleId);
-
-	if (!g_pCore->GetGame()->GetVehicleManager()->DoesExists(vehicleId))
-		return;
-
-	byte byteSeat;
-	pBitStream->Read(byteSeat);
 
 	g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId)->ExitVehicle(eExitVehicleType::EXIT_VEHICLE_NORMAL);
 }
@@ -1459,8 +1460,8 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_CHECKPOINTS), GetCheckpoints);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_BLIPS), GetBlips);
 
-		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE), EnterVehicle);
-		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE), ExitVehicle);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PUT_INTO_VEHICLE), PutIntoVehicle);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_REMOVE_FROM_VEHICLE), RemoveFromVehicle);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_NAME_CHANGE), SetPlayerName);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_SET_POSITION), SetPlayerPosition);
@@ -1484,6 +1485,7 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_SET_HUD_VISIBLE), SetPlayerHudElementVisible);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), TriggerPlayerEvent);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_KICK_NOTIFICATION), KickNotification);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_DEATH), PlayerDeath);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_POSITION), SetVehiclePosition);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ROTATION), SetVehicleRotation);
@@ -1537,8 +1539,8 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_CHECKPOINTS));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_BLIPS));
 
-		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE));
-		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PUT_INTO_VEHICLE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_REMOVE_FROM_VEHICLE));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_NAME_CHANGE));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_SET_POSITION));
@@ -1560,6 +1562,9 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_MESSAGE_TO_ALL));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_SPAWN));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_SET_HUD_VISIBLE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_KICK_NOTIFICATION));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_DEATH));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_POSITION));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_ROTATION));

@@ -63,7 +63,7 @@ void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 	RakNet::BitStream bitStream;
 
-	if (dwVersion != MOD_VERSION_NUMBER)
+	if (dwVersion != NETWORK_VERSION)
 	{
 		bitStream.Write(REASON_BAD_VERSION);
 		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_KICK_NOTIFICATION), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
@@ -397,8 +397,7 @@ void PlayerDeath(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	if (pPlayer)
 	{
 		// Kill the player
-		//pPlayer->KillForWorld();
-
+		pPlayer->GetScriptPlayer()->Kill();
 
 		CScriptArguments args;
 		args.push(pPlayer->GetScriptPlayer());
@@ -413,18 +412,15 @@ void PlayerDeath(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 			{
 				args.push(1);
 				args.push(pKiller->GetScriptPlayer());
-				//CLogFile::Printf("[death] %s has been killed by %s!", pPlayer->GetName().Get(), pKiller->GetName().Get());
 			}
 			else
 			{
 				args.push(2);
 				args.push(-1);
-				//CLogFile::Printf("[death] %s has been killed!", pPlayer->GetName().Get());
 			}
 		}
 		else
 		{
-			//CLogFile::Printf("[death] %s has died!", pPlayer->GetName().Get());
 			args.push(0);
 			args.push(-1);
 
@@ -481,8 +477,6 @@ void PlayerChangeName(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 		// Is the pointer valid?
 		if (pPlayer)
 		{
-			CLogFile::Printf("%s is now called %s", pPlayer->GetName().Get(), newNick.C_String());
-
 			// Change the nick of the player
 			pPlayer->SetName(CString(newNick.C_String()));
 
@@ -509,90 +503,11 @@ void TriggerServerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 	// Is the player instance valid?
 	if (pPlayer)
 	{
-		//RakNet::BitStream bitStream;
-		//bitStream.Write(playerId);
-		//CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_ENTER_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 		CScriptArguments args;
 		args.push(pPlayer->GetScriptPlayer());
 		CEvents::GetInstance()->Call(eventName.C_String(), &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
 
 	}
-}
-
-void VehicleEnter(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Get the player id
-	EntityId playerId = (EntityId)pPacket->guid.systemIndex;
-
-	// Read the vehicle id
-	EntityId vehicleId;
-	pBitStream->Read(vehicleId);
-
-	// Read the seat
-	byte byteSeat;
-	pBitStream->Read(byteSeat);
-
-	// Get the player instance
-	CPlayerEntity * pPlayer = CServer::GetInstance()->GetPlayerManager()->GetAt(playerId);
-
-	CVehicleEntity * pVehicle = CServer::GetInstance()->GetVehicleManager()->GetAt(vehicleId);
-
-	// Is the player instance valid?
-	if (pPlayer)
-	{
-		// Just send the event to the other players
-		RakNet::BitStream bitStream;
-		bitStream.Write(playerId);
-		bitStream.Write(vehicleId);
-		bitStream.Write(byteSeat);
-		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_ENTER_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
-		pPlayer->m_vehicleSeatId = byteSeat;
-		CScriptArguments args;
-		args.push(pPlayer->GetScriptPlayer());
-		args.push(pVehicle->GetScriptVehicle());
-		args.push(byteSeat);
-		CEvents::GetInstance()->Call("playerEnterVehicle", &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
-
-	}
-
-	CLogFile::Printf("RPC_ENTER_VEHICLE - Player: %d, Vehicle: %d, Seat: %d", playerId, vehicleId, byteSeat);
-}
-
-void VehicleExit(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Get the player id
-	EntityId playerId = (EntityId)pPacket->guid.systemIndex;
-
-	// Read the vehicle id
-	EntityId vehicleId;
-	pBitStream->Read(vehicleId);
-
-	// Read the seat
-	byte byteSeat;
-	pBitStream->Read(byteSeat);
-
-	// Get the player instance
-	CPlayerEntity * pPlayer = CServer::GetInstance()->GetPlayerManager()->GetAt(playerId);
-
-	CVehicleEntity * pVehicle = CServer::GetInstance()->GetVehicleManager()->GetAt(vehicleId);
-
-	// Is the player instance valid?
-	if (pPlayer)
-	{
-		// Handle this with the player
-		RakNet::BitStream bitStream;
-		bitStream.Write(playerId);
-		bitStream.Write(vehicleId);
-		bitStream.Write(byteSeat);
-		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_EXIT_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
-		pPlayer->m_vehicleSeatId = 255;
-		CScriptArguments args;
-		args.push(pPlayer->GetScriptPlayer());
-		args.push(pVehicle->GetScriptVehicle());
-		CEvents::GetInstance()->Call("playerExitVehicle", &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
-	}
-
-	CLogFile::Printf("RPC_EXIT_VEHICLE - Player: %d, Vehicle: %d, Seat: %d", playerId, vehicleId, byteSeat);
 }
 
 void CheckpointEnter(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -667,10 +582,6 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_NAME_CHANGE), PlayerChangeName);
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), TriggerServerEvent);
 
-	// Vehicle rpcs
-	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE), VehicleEnter);
-	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE), VehicleExit);
-
 	// Checkpoint rpcs
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_ENTER_CHECKPOINT), CheckpointEnter);
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_EXIT_CHECKPOINT), CheckpointExit);
@@ -692,10 +603,6 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_DEATH));
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_REQUEST_SPAWN));
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_NAME_CHANGE));
-
-	// Vehicle rpcs
-	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_ENTER_VEHICLE));
-	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_EXIT_VEHICLE));
 
 	// Checkpoint rpcs
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_ENTER_CHECKPOINT));

@@ -177,6 +177,7 @@
     <ClCompile Include="..\Shared\CString.cpp" />
     <ClCompile Include="..\Shared\CXML.cpp" />
     <ClCompile Include="..\Shared\Network\CBitStream.cpp" />
+    <ClCompile Include="..\Shared\Network\CHttpClient.cpp" />
     <ClCompile Include="..\Shared\Scripting\ApplyTuple.cpp" />
     <ClCompile Include="..\Shared\Scripting\CEvents.cpp" />
     <ClCompile Include="..\Shared\Scripting\CLuaVM.cpp" />
@@ -247,6 +248,7 @@
     <ClInclude Include="..\Libraries\lua\lzio.h" />
     <ClInclude Include="..\Shared\CLibrary.h" />
     <ClInclude Include="..\Shared\Network\CBitStream.h" />
+    <ClInclude Include="..\Shared\Network\CHttpClient.h" />
     <ClInclude Include="..\Shared\Network\PacketIdentifiers.h" />
     <ClInclude Include="..\Shared\Network\RPCIdentifiers.h" />
     <ClInclude Include="..\Shared\Scripting\ApplyTuple.h" />

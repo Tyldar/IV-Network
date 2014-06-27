@@ -34,10 +34,15 @@ We accept only pull request if you want to contribute
 
 ## Compile on Linux
 
-# Ubuntu 12.4
-
 Only once:
+ On Ubuntu:
 * sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+
+ On Debian:
+* nano /etc/apt/source.list
+deb http://ftp.de.debian.org/debian sid main
+
+ Common:
 * sudo apt-get update
 * sudo apt-get install g++-4.7 c++-4.7
 * sudo update-alternatives --install "/usr/bin/gcc" "gcc" "/usr/bin/gcc-4.7" 1
@@ -48,15 +53,3 @@ Only once:
 On every compile:
 * cd path/to/source/
 * make
-
-# Ubuntu 13.10
-
-TODO
-
-# Debian 6.0.7 / 6.0.8
-
-TODO
-
-# Debian 7.1 / 7.2
-
-TODO
