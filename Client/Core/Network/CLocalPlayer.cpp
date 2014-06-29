@@ -220,12 +220,6 @@ void CLocalPlayer::CheckVehicleEnterExit()
 						// Enter the vehicle
 						EnterVehicle(pVehicle, byteSeat);
 
-						// Send to the server
-						RakNet::BitStream bitStream;
-						bitStream.Write(m_pVehicleEnterExit->pVehicle->GetId());
-						bitStream.Write(byteSeat);
-						g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_ENTER_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
-						
 						CScriptArguments args;
 						args.push(m_pVehicleEnterExit->pVehicle->GetId());
 						args.push(byteSeat);
@@ -250,13 +244,7 @@ void CLocalPlayer::CheckVehicleEnterExit()
 				{
 					// Exit the vehicle
 					ExitVehicle(EXIT_VEHICLE_NORMAL);
-
-					// Send to the server
-					RakNet::BitStream bitStream;
-					bitStream.Write(GetVehicle()->GetId());
-					bitStream.Write(GetSeat());
-					g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_EXIT_VEHICLE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
-
+	
 					CScriptArguments args;
 					args.push(GetVehicle()->GetId());
 					args.push(GetSeat());

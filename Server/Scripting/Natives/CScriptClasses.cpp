@@ -15,6 +15,7 @@
 #include "../../../Server/Scripting/Natives/Natives_Server.h"
 #include "Entity/Entities.h"
 #include "CTimer.h"
+#include <CXML.h>
 #include <CServer.h>
 
 int IsPlayerConnected(int * VM)
@@ -241,6 +242,22 @@ int CreateTimer(int * VM)
 	return 1;
 }
 
+int OpenXML(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString strFilePath;
+	pVM->Pop(strFilePath);
+
+	CScriptXML* pScriptXML = new CScriptXML();
+	pScriptXML->load(strFilePath);
+	pVM->PushInstance("CXML", pScriptXML);
+
+	return 1;
+}
+
 class CScriptSQLite
 {
 public:
@@ -268,6 +285,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 	pVM->RegisterFunction("createCheckpoint", CreateCheckpoint);
 	pVM->RegisterFunction("createBlip", CreateBlip);
 	pVM->RegisterFunction("createTimer", CreateTimer);
+	pVM->RegisterFunction("openXML", OpenXML);
 
 #if 0
 	(new CScriptClass<CScriptSQLite>("CSQLite"))->
@@ -284,6 +302,31 @@ void CScriptClasses::Register(IScriptVM * pVM)
 		AddMethod("close", &CScriptMySQL::Close).
 		Register(pVM);
 #endif
+	{ // ScriptXML
+		static CScriptClass<CScriptXML>* pScriptXML = &(new CScriptClass<CScriptXML>("CXML"))->
+			AddMethod("save", &CScriptXML::save).
+			AddMethod("close", &CScriptXML::close).
+			AddMethod("setTabSize", &CScriptXML::setTabSize).
+			AddMethod("getAttribute", &CScriptXML::getAttribute).
+			AddMethod("removeAttribute", &CScriptXML::removeAttribute).
+			AddMethod("setAttribute", &CScriptXML::setAttribute).
+			AddMethod("nodeName", &CScriptXML::nodeName).
+			AddMethod("nodeSetName", &CScriptXML::nodeSetName).
+			AddMethod("nodeContent", &CScriptXML::nodeContent).
+			AddMethod("noteSetContent", &CScriptXML::nodeSetContent).
+			AddMethod("nodeToRoot", &CScriptXML::nodeToRoot).
+			AddMethod("findNode", &CScriptXML::findNode).
+			AddMethod("nextNode", &CScriptXML::nextNode).					
+			AddMethod("previousNode", &CScriptXML::previousNode).
+			AddMethod("childNodeFirst", &CScriptXML::childNodeFirst).
+			AddMethod("nodeParent", &CScriptXML::nodeParent).
+			AddMethod("nodeCleat", &CScriptXML::nodeClear).
+			AddMethod("newNode", &CScriptXML::newNode).
+			AddMethod("newComment", &CScriptXML::newComment).
+			AddMethod("lastError", &CScriptXML::lastError).
+			AddMethod("isComment", &CScriptXML::isComment);
+		(pScriptXML)->Register(pVM);
+	}
 
 	{ // ScriptPlayer
 		static CScriptClass<CScriptPlayer>* pScriptPlayer = &(new CScriptClass<CScriptPlayer>("CPlayerEntity"))->
