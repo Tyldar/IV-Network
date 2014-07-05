@@ -706,7 +706,7 @@ void KickNotification(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	int reason;
 	pBitStream->Read(reason);
 
-	if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your name is used on server.");
+	if (reason == REASON_NAME_IS_USED) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your name is used on server.");
 	else if (reason == REASON_BAD_VERSION) g_pCore->GetGraphics()->GetChat()->Print("You've been kicked, because your version differs from server version.");
 }
 

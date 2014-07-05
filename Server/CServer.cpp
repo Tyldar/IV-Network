@@ -76,6 +76,7 @@ CServer::~CServer()
 void OnCreateVM(IScriptVM* pVM)
 {
 	CScriptClasses::Register(pVM);
+	CServerNatives::Register(pVM);
 }
 
 bool CServer::Startup()

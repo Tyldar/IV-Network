@@ -223,7 +223,7 @@ void CLocalPlayer::CheckVehicleEnterExit()
 						CScriptArguments args;
 						args.push(m_pVehicleEnterExit->pVehicle->GetId());
 						args.push(byteSeat);
-						CEvents::GetInstance()->Call("playerEnterVehicle", &args, CEventHandler::eEventType::NATIVE_EVENT, nullptr);						
+						CEvents::GetInstance()->Call("playerEnterVehicle", &args, CEventHandler::eEventType::NATIVE_EVENT, nullptr);
 
 						g_pCore->GetGraphics()->GetChat()->Print(CString("HandleVehicleEntry(%d, %d)", pVehicle->GetId(), byteSeat));
 					}

@@ -40,6 +40,7 @@ private:
 	static int	Shutdown(int * pVM);
 	static int	GetTickCount(int * pVM);
 	static int	SendConsoleInput(int * pVM);
+	static int	GetMD5Hash(int * pVM);
 public:
 	static void Register(IScriptVM* pVM);
 };

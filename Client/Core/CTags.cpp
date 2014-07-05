@@ -103,7 +103,7 @@ void CTags::Draw()
 				g_pCore->GetGraphics()->DrawBox(vecScreenPosition.fX - BAR_BORDER, vecScreenPosition.fY - BAR_BORDER, g_pCore->GetGraphics()->GetStringWidth(strString) + BAR_BORDER * 2.0f, BAR_HEIGHT + BAR_BORDER * 2.0f, D3DCOLOR_ARGB(160, 0, 0, 0));
 
 				// Health Bar
-				g_pCore->GetGraphics()->DrawBox(vecScreenPosition.fX, vecScreenPosition.fY, g_pCore->GetGraphics()->GetStringWidth(strString) * (((pPlayer->GetHealth() < 100.0f ? 100.0f : pPlayer->GetHealth()) - 100.0f) / 100.0f), BAR_HEIGHT, D3DCOLOR_ARGB(255, 87, 124, 88));
+				g_pCore->GetGraphics()->DrawBox(vecScreenPosition.fX, vecScreenPosition.fY, g_pCore->GetGraphics()->GetStringWidth(strString) * (pPlayer->GetHealth() / 100.0f), BAR_HEIGHT, D3DCOLOR_ARGB(255, 87, 124, 88));
 
 				if (pPlayer->GetArmour() > 0.0f)
 				{
