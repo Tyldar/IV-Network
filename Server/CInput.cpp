@@ -118,14 +118,16 @@ void CInput::ProcessInput(CString strInput)
 	else if (strCommand == "reloadresource")
 	{
 		if (strParameters.IsEmpty()) return;
+		
+		CResource * pResource = CServer::GetInstance()->GetResourceManager()->GetResource(strParameters);
 
-		if ((CServer::GetInstance()->GetResourceManager()->GetResource(strParameters) == nullptr) ? CServer::GetInstance()->GetResourceManager()->Reload(CServer::GetInstance()->GetResourceManager()->GetResource(strParameters)) : CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters))
-		{
-			if (!CServer::GetInstance()->GetResourceManager()->StartResource(CServer::GetInstance()->GetResourceManager()->GetResource(strParameters)))
-				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
-		}
+		if (pResource == nullptr)
+			pResource = CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters);
 		else
-			CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+			CServer::GetInstance()->GetResourceManager()->Reload(pResource);
+
+		if (!CServer::GetInstance()->GetResourceManager()->StartResource(pResource))
+				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
 	}
 	else if (strCommand == "unloadresource")
 	{
