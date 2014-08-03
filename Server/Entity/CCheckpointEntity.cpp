@@ -39,6 +39,15 @@ CCheckpointEntity::~CCheckpointEntity()
 {
 }
 
+void CScriptCheckpoint::DeleteCheckpoint(){
+	EntityId checkpointId = GetEntity()->GetId();
+
+	CServer::GetInstance()->GetCheckpointManager()->Delete(checkpointId);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(checkpointId);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_DELETE_CHECKPOINT), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
 
 void CScriptCheckpoint::ShowForPlayer(EntityId playerId)
 {

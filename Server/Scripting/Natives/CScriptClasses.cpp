@@ -408,7 +408,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 
 	{ // ScriptCheckpoint
 		static CScriptClass<CScriptCheckpoint>* pScriptCheckpoint = &(new CScriptClass<CScriptCheckpoint>("CCheckpointEntity"))->
-			//AddMethod("Delete", &CScriptCheckpoint::DeleteCheckpoint).
+			AddMethod("deleteCheckpoint", &CScriptCheckpoint::DeleteCheckpoint).
 			AddMethod("showForPlayer", &CScriptCheckpoint::ShowForPlayer).
 			AddMethod("hideForPlayer", &CScriptCheckpoint::HideForPlayer).
 			AddMethod("showForAll", &CScriptCheckpoint::ShowForAll).

@@ -1152,6 +1152,24 @@ void CreateCheckpoint(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	}
 }
 
+void DeleteCheckpoint(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the checkpointId
+	EntityId checkpointId;
+	pBitStream->Read(checkpointId);
+
+	// Get a pointer to the checkpoint
+	CCheckpointEntity * pCheckpoint = g_pCore->GetGame()->GetCheckpointManager()->GetAt(checkpointId);
+
+	// Is the checkpoint pointer valid?
+	if (pCheckpoint)
+	{
+		pCheckpoint->Hide();
+	}
+
+	g_pCore->GetGame()->GetCheckpointManager()->Delete(checkpointId);
+}
+
 void SetCheckpointPosition(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	// Read the checkpointId
@@ -1501,6 +1519,7 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL), SetVehicleDirtLevel);
 
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT), CreateCheckpoint);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_DELETE_CHECKPOINT), DeleteCheckpoint);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SET_POSITION), SetCheckpointPosition);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SET_TARGET_POSITION), SetCheckpointTargetPosition);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SHOW), ShowCheckpoint);
@@ -1580,6 +1599,7 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_VEHICLE_SET_DIRT_LEVEL));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CREATE_CHECKPOINT));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_DELETE_CHECKPOINT));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SET_POSITION));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SET_TARGET_POSITION));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CHECKPOINT_SHOW));

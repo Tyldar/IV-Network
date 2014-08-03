@@ -405,14 +405,14 @@
     <ClCompile Include="..\Shared\CLibrary.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Network\CMasterList.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
     <ClCompile Include="..\Shared\Network\CHttpClient.cpp">
       <Filter>Source Files\Shared\Network</Filter>
     </ClCompile>
     <ClCompile Include="..\Libraries\md5\md5.cpp">
       <Filter>Libraries\md5</Filter>
+    </ClCompile>
+    <ClCompile Include="Network\CMasterList.cpp">
+      <Filter>Source Files\Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
