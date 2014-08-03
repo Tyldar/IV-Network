@@ -253,9 +253,8 @@ CPlayerEntity::~CPlayerEntity()
 unsigned short CPlayerEntity::GetPing()
 {
 	if(IsLocalPlayer())
-	{
-		//TODO: Get ping to current connected server.
-		return -1;
+	{	
+		return g_pCore->GetGame()->GetLocalPlayer()->GetPing();
 	}
 	else
 		return m_usPing;
@@ -269,7 +268,7 @@ void CPlayerEntity::Pulse()
 		if(!IsLocalPlayer())
 		{
 			// Are we not in a vehicle?
-			if(!IsInVehicle())
+			if(!IsInAnyVehicle())
 			{
 				if (!IsJumping())
 				{
@@ -558,7 +557,7 @@ void CPlayerEntity::SetPosition(CVector3& vecPosition, bool bForce)
 	// Are we spawned?
 	if(IsSpawned())
 		// Are we not in a vehicle and not entering a vehicle?
-		if(!InternalIsInVehicle() && !HasVehicleEnterExit())
+		if(!InternalIsInAnyVehicle() && !HasVehicleEnterExit())
 		{
 			m_pPlayerPed->RemoveFromWorld();
 			Vector4 coords(vecPosition.fX, vecPosition.fY, vecPosition.fZ, 0);
@@ -649,7 +648,7 @@ float CPlayerEntity::GetHealth()
 {
 	unsigned fHealth;
 	EFLC::CScript::GetCharHealth(GetScriptingHandle(), &fHealth);
-	return (float)fHealth;
+	return (float)(!fHealth ? 0 : fHealth-100);
 }
 
 void CPlayerEntity::SetArmour(float fnewArmour)
@@ -768,6 +767,10 @@ void CPlayerEntity::SetModel(int iModelId)
 		EFLC::CScript::ChangePlayerModel(m_bytePlayerNumber,(EFLC::CScript::eModel)dwModelHash);
 
 		m_pPlayerPed->SetPed(m_pPlayerInfo->GetPlayerPed());
+
+		//fix: no more random clothes
+		//for (int i = 0; i < 11; ++i)
+			//SetClothes(i, 0);
 	}
 }
 
@@ -832,7 +835,7 @@ void CPlayerEntity::GetLastControlState(CControlState * pControlState)
 void CPlayerEntity::InternalPutInVehicle(CVehicleEntity * pVehicle, BYTE byteSeat)
 {
 	// Is the player spawned and not in a vehicle?
-	if(IsSpawned() && !InternalIsInVehicle())
+	if(IsSpawned() && !InternalIsInAnyVehicle())
 	{
 
 		//if (IsSpawned() && !InternalIsInVehicle())
@@ -903,11 +906,20 @@ void CPlayerEntity::InternalRemoveFromVehicle()
 	}
 }
 
-bool CPlayerEntity::InternalIsInVehicle()
+bool CPlayerEntity::InternalIsInAnyVehicle()
 {
 	// Are we spawned?
 	if(IsSpawned())
-		return (m_pPlayerPed->IsInVehicle());
+		return (m_pPlayerPed->IsInAnyVehicle());
+
+	return false;
+}
+
+bool CPlayerEntity::InternalIsInVehicle(CVehicleEntity * pVehicle)
+{
+	// Are we spawned?
+	if (IsSpawned())
+		return (m_pPlayerPed->IsInVehicle(pVehicle->GetGameVehicle()->GetVehicle()));
 
 	return false;
 }
@@ -923,7 +935,7 @@ void CPlayerEntity::PutInVehicle(CVehicleEntity * pVehicle, BYTE byteSeat)
 		return;
 
 	// Are we already in a vehicle?
-	if(IsInVehicle())
+	if(IsInAnyVehicle())
 	{
 		// Remove from the vehicle
 		RemoveFromVehicle();
@@ -982,7 +994,7 @@ void CPlayerEntity::EnterVehicle(CVehicleEntity * pVehicle, BYTE byteSeat)
 		return;
 
 	// Are we already in a vehicle?
-	if(IsInVehicle())
+	if(IsInAnyVehicle())
 		return;
 
 	// Create the enter vehicle task
@@ -1404,6 +1416,8 @@ void CPlayerEntity::Kill(bool bInstantly)
 	// Are we spawned and not already dead?
 	if(IsSpawned() && !IsDead())
 	{
+		m_bSpawned = false;
+
 		// Are we getting killed instantly?
 		if(bInstantly) 
 		{
@@ -1505,7 +1519,7 @@ bool CPlayerEntity::GetKillInfo(EntityId & playerId, EntityId & vehicleId, Entit
 				else
 				{
 					// Is this players vehicle the last damage entity?
-					if(pPlayer->IsInVehicle() && !pPlayer->IsPassenger() && 
+					if(pPlayer->IsInAnyVehicle() && !pPlayer->IsPassenger() && 
 					   (GetLastDamageEntity() == pPlayer->GetVehicle()->GetGameVehicle()->GetVehicle()))
 					{
 						// This player killed us with their vehicle
@@ -1627,7 +1641,7 @@ unsigned char CPlayerEntity::GetClothes(unsigned short ucBodyLocation)
 
 void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 {
-	if (!IsInVehicle())
+	if (!IsInAnyVehicle())
 	{
 		CNetworkPlayerSyncPacket PlayerPacket;
 
@@ -1674,7 +1688,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 			pBitStream->Write(WeaponPacket);
 		}
 	}
-	else if (IsInVehicle() && !IsPassenger())
+	else if (IsInAnyVehicle() && !IsPassenger())
 	{
 		CNetworkPlayerVehicleSyncPacket VehiclePacket;
 		VehiclePacket.vehicleId = m_pVehicle->GetId();
@@ -1689,6 +1703,9 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		VehiclePacket.vehHealth = m_pVehicle->GetHealth();
 		//VehiclePacket. = m_pVehicle->GetPetrolTankHealth();
 		VehiclePacket.bEngineState = m_pVehicle->GetEngineState();
+		VehiclePacket.bSirenState = m_pVehicle->GetSirenState();
+		VehiclePacket.bLightsState = m_pVehicle->GetGameVehicle()->GetHeadlights();
+		VehiclePacket.bHornState = EFLC::CScript::IsPlayerPressingHorn(g_pCore->GetGame()->GetLocalPlayer()->GetScriptingHandle());
 		VehiclePacket.playerArmor = GetArmour();
 		VehiclePacket.playerHealth = GetHealth();
 		VehiclePacket.weapon.iAmmo = m_pPlayerWeapons->GetAmmo(m_pPlayerWeapons->GetCurrentWeapon());
@@ -1699,7 +1716,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		pBitStream->Write(RPC_PACKAGE_TYPE_PLAYER_VEHICLE);
 		pBitStream->Write(VehiclePacket);
 	}
-	else if (IsInVehicle() && IsPassenger())
+	else if (IsInAnyVehicle() && IsPassenger())
 	{
 		CNetworkPlayerPassengerSyncPacket PassengerPacket;
 
@@ -1708,7 +1725,7 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream)
 		PassengerPacket.playerHealth = GetHealth();
 		GetPosition(PassengerPacket.vecPosition);
 		PassengerPacket.vehicleId = m_pVehicle->GetId();
-		//PassengerPacket.byteSeatId = m_byteSeat;
+		PassengerPacket.byteSeatId = GetSeat();
 		
 		pBitStream->Write(RPC_PACKAGE_TYPE_PLAYER_PASSENGER);
 		pBitStream->Write(PassengerPacket);
@@ -1725,10 +1742,15 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 	if (eType == RPC_PACKAGE_TYPE_PLAYER_ONFOOT)
 	{
 		CNetworkPlayerSyncPacket PlayerPacket;
-		if (IsInVehicle())
-			m_pVehicle = nullptr;
+		if (InternalIsInAnyVehicle())
+			ExitVehicle(eExitVehicleType::EXIT_VEHICLE_NORMAL);
 
 		pBitStream->Read(PlayerPacket);
+
+		if (InternalIsInAnyVehicle())
+		{
+			ExitVehicle(eExitVehicleType::EXIT_VEHICLE_NORMAL);
+		}
 
 		unsigned int interpolationTime = SharedUtility::GetTime() - m_ulLastSyncReceived;
 
@@ -1783,14 +1805,14 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 	{
 		CNetworkPlayerVehicleSyncPacket VehiclePacket;
 		pBitStream->Read(VehiclePacket);
-
+		if (!g_pCore->GetGame()->GetVehicleManager()->GetAt(VehiclePacket.vehicleId)->IsSpawned()) return;
 #ifdef SYNC_TEST
 		VehiclePacket.vehicleId += 1;
 #endif
 
 		unsigned int interpolationTime = SharedUtility::GetTime() - m_ulLastSyncReceived;
 
-		if (IsInVehicle())
+		if (InternalIsInVehicle(g_pCore->GetGame()->GetVehicleManager()->GetAt(VehiclePacket.vehicleId)))
 		{
 			if (m_pVehicle->GetId() == VehiclePacket.vehicleId)
 			{
@@ -1819,7 +1841,11 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 				m_pVehicle->SetTurnSpeed(VehiclePacket.vecTurnSpeed);
 				m_pVehicle->SetHealth(VehiclePacket.vehHealth);
 				//m_pVehicle->SetPetrolTankHealth(VehiclePacket.petrol);
-				m_pVehicle->SetEngineState(VehiclePacket.bEngineState);
+
+				if (VehiclePacket.bEngineState != m_pVehicle->GetEngineState()) m_pVehicle->SetEngineState(VehiclePacket.bEngineState);
+				if (VehiclePacket.bSirenState != m_pVehicle->GetSirenState()) m_pVehicle->SetSirenState(VehiclePacket.bSirenState);
+				if (VehiclePacket.bHornState) m_pVehicle->SoundHorn(500);
+				if (VehiclePacket.bLightsState != m_pVehicle->GetGameVehicle()->GetHeadlights()) m_pVehicle->GetGameVehicle()->SetHeadlights(VehiclePacket.bLightsState);
 
 				SetArmour(VehiclePacket.playerArmor);
 				SetHealth(VehiclePacket.playerHealth);
@@ -1861,12 +1887,14 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream)
 		CNetworkPlayerPassengerSyncPacket PassengerPacket;
 		pBitStream->Read(PassengerPacket);
 
+		if (!g_pCore->GetGame()->GetVehicleManager()->GetAt(PassengerPacket.vehicleId)->IsSpawned()) return;
+
 		SetPosition(PassengerPacket.vecPosition);
 		SetControlState(&PassengerPacket.ControlState);
 		SetArmour(PassengerPacket.playerArmor);
 		SetHealth(PassengerPacket.playerHealth);
 
-		if (!IsInVehicle() || !InternalIsInVehicle())
+		if (!InternalIsInVehicle(g_pCore->GetGame()->GetVehicleManager()->GetAt(PassengerPacket.vehicleId)))
 		{
 			ResetVehicleEnterExit();
 

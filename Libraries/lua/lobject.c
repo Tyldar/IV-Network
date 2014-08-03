@@ -1,5 +1,5 @@
 /*
-** $Id: lobject.c,v 2.58 2013/02/20 14:08:56 roberto Exp $
+** $Id: lobject.c,v 2.58.1.1 2013/04/12 18:48:47 roberto Exp $
 ** Some generic functions over Lua objects
 ** See Copyright Notice in lua.h
 */
@@ -247,7 +247,7 @@ const char *luaO_pushfstring (lua_State *L, const char *fmt, ...) {
 #define PRE	"[string \""
 #define POS	"\"]"
 
-#define addstr(a,b,l)	(memcpy(a,b,(l) * sizeof(char)), a += (l) )
+#define addstr(a,b,l)	( memcpy(a,b,(l) * sizeof(char)), a += (l) )
 
 void luaO_chunkid (char *out, const char *source, size_t bufflen) {
   size_t l = strlen(source);

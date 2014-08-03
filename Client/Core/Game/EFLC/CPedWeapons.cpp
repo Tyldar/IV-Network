@@ -128,7 +128,7 @@ void CPedWeapons::SetCurrentWeaponBySlot(eWeaponSlot weaponSlot)
 		if(weaponSlot >= WEAPON_SLOT_MAX)
 			return;
 
-		((void(__thiscall *) (IPedWeapons *, int, eWeaponSlot, bool, IPed *))(COffsets::FUNC_CPedWeapon__SetCurrentWeapon))(m_pPedWeapons, m_pPed->IsInVehicle() ? 19 : 0, weaponSlot, true, m_pPed->GetPed());
+		((void(__thiscall *) (IPedWeapons *, int, eWeaponSlot, bool, IPed *))(COffsets::FUNC_CPedWeapon__SetCurrentWeapon))(m_pPedWeapons, m_pPed->IsInAnyVehicle() ? 19 : 0, weaponSlot, true, m_pPed->GetPed());
 	}
 }
 

@@ -95,6 +95,8 @@ CVehicleEntity::CVehicleEntity(int iVehicleModel, CVector3 vecPos, float fAngle,
 	// Set the spawn position
 	memcpy(&m_vecSpawnPosition, &vecPos, sizeof(CVector3));
 
+	memcpy(&m_vecRotation, &CVector3(fAngle, 0.0f, 0.0f), sizeof(CVector3));
+
 }
 
 CVehicleEntity::~CVehicleEntity()
@@ -129,8 +131,8 @@ bool CVehicleEntity::Create()
 	if (pVehicle)
 	{
 		pVehicle->Function76(0);
-		//pVehicle->m_byteFlags1 |= 4u;
-		//pVehicle->m_dwFlags1 |= 8u; // set fixed wait for collision/
+		pVehicle->m_byteFlags1 |= 4u;
+		pVehicle->m_dwFlags1 |= 8u; // set fixed wait for collision/
 
 		CWorld__AddEntity(pVehicle, false);
 		CVehicleModelInfo__AddReference(m_pModelInfo->GetModelInfo());
@@ -166,7 +168,8 @@ bool CVehicleEntity::Create()
 		Reset();
 
 		SetPosition(m_vecSpawnPosition);
-
+		SetRotation(m_vecRotation);
+		
 		CLogFile::Printf("Created vehicle! (Id: %d, Handle: %X)", m_vehicleId, g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(pVehicle));
 		return true;
 	}
@@ -222,7 +225,11 @@ void CVehicleEntity::Reset()
 
 	// Turn the engine off
 	SetEngineState(false);
-	
+
+	SetLightsState(false);
+	SetSirenState(false);
+	SetTaxiLightsState(false);
+
 	// Reset Indicators
 	SetIndicatorState(false,false,false,false);
 
@@ -451,13 +458,13 @@ void CVehicleEntity::SetPosition(const CVector3& vecPosition, bool bDontCancelTa
 		//EFLC::CScript::SetCarCoordinatesNoOffset(GetScriptingHandle(), vecPosition.fX, vecPosition.fY, vecPosition.fZ);
 		//EFLC::CScript::SetCarCoordinates(GetScriptingHandle(), vecPosition.fX, vecPosition.fY, vecPosition.fZ);
 		//m_pVehicle->AddToWorld();
+		
+		// Reset interpolation if requested
+		if (bResetInterpolation)
+			RemoveTargetPosition();		
 	}
 
 	m_vecPosition = vecPosition;
-
-	// Reset interpolation if requested
-	if (bResetInterpolation)
-		RemoveTargetPosition();
 }
 
 void CVehicleEntity::GetPosition(CVector3& vecPosition)
@@ -496,13 +503,13 @@ void CVehicleEntity::SetRotation(const CVector3& vecRotation, bool bResetInterpo
 
 		// Set the new vehicle matrix
 		m_pVehicle->SetMatrix(matMatrix);
+		
+		// Reset interpolation if requested
+		if(bResetInterpolation)
+			RemoveTargetRotation();		
 	}
 
 	m_vecRotation = vecRotation;
-
-	// Reset interpolation if requested
-	if(bResetInterpolation)
-		RemoveTargetRotation();
 }
 
 void CVehicleEntity::GetRotation(CVector3& vecRotation)
@@ -1053,11 +1060,7 @@ void CVehicleEntity::SetTaxiLightsState(bool bState)
 
 bool CVehicleEntity::GetTaxiLightsState()
 {
-    // Are we spawned?
-    if(IsSpawned())
-        return m_bTaxiLights;
-
-    return false;
+    return m_bTaxiLights;
 }
 
 void CVehicleEntity::SetCarDoorAngle(int iDoor,bool bClose, float fAngle)
@@ -1094,10 +1097,10 @@ void CVehicleEntity::SetLightsState(bool bLights)
         if(bLights)
 			EFLC::CScript::ForceCarLights(GetScriptingHandle(), 2);
         else
-			EFLC::CScript::ForceCarLights(GetScriptingHandle(), 1);
-
-        m_bLights = bLights;
+			EFLC::CScript::ForceCarLights(GetScriptingHandle(), 1);   
     }
+	
+	m_bLights = bLights;
 }
 
 bool CVehicleEntity::GetLightsState()
@@ -1105,7 +1108,7 @@ bool CVehicleEntity::GetLightsState()
 	if (IsSpawned())
 		return (m_pVehicle->GetLightsState() == 2);
 
-	return false;
+	return m_bLights;
 }
 
 bool CVehicleEntity::GetWindowState(int iWindow)
@@ -1151,6 +1154,8 @@ void CVehicleEntity::SetEngineState(bool bState)
     // Are we spawned?
     if(IsSpawned()) 
         m_pVehicle->SetEngineStatus(bState, 1);
+		
+	m_bEngineStatus = bState;
 }
 
 bool CVehicleEntity::GetEngineState()
@@ -1159,7 +1164,7 @@ bool CVehicleEntity::GetEngineState()
     if(IsSpawned())
         return m_pVehicle->GetEngineStatus();
 
-    return false;
+    return m_bEngineStatus;
 }
 void CVehicleEntity::SetVehicleGPSState(bool bState)
 {

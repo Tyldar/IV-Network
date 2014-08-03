@@ -13,5 +13,7 @@ public:
 
 	bool DoesExist(CTimer* pTimer);
 
+	void Remove(CTimer* pTimer) { remove(pTimer); }
+
 	void Pulse();
 };

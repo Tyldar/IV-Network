@@ -182,7 +182,8 @@ typedef unsigned short EntityId;
 #define NETWORK_VERSION 0x1
 
 // Mod version string
-#define MOD_VERSION_STRING "1.0.0 DEV EFLC"
+#define MOD_VERSION_STRING "0.1.2"
+#define MOD_VERSION_NUMBER 112
 
 // Masterlist Information
 #define MASTERLIST_URL 		"www.gta-network.net/masterlist/iv"

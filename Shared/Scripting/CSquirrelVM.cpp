@@ -45,6 +45,10 @@ CSquirrelVM::CSquirrelVM(CResource * pResource)
 	// Push the root table onto the stack
 	sq_pushroottable(m_pVM);
 
+#ifdef _SERVER
+	sqstd_register_iolib(m_pVM);
+#endif 
+
 	sqstd_register_stringlib(m_pVM);
 
 	sqstd_register_mathlib(m_pVM);

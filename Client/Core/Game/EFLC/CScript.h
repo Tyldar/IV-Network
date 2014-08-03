@@ -73,8 +73,10 @@ namespace CScript
 	static bool IsPlayerBeingArrested() { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_BEING_ARRESTED); }
 	static bool IsPlayerPlaying(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_PLAYING, playerIndex); }
 	static bool IsPlayerFreeForAmbientTask(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_FREE_FOR_AMBIENT_TASK, playerIndex); }
+	static bool IsPlayerPressingHorn(unsigned int playerIndex) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PLAYER_PRESSING_HORN, playerIndex); }
 
 	// Char
+	static void TaskDie(unsigned int ped) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_TASK_DIE, ped); }
 	static bool DoesCharExist(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_DOES_CHAR_EXIST, ped); }
 	static bool IsPedInCover(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_PED_IN_COVER, ped); }
 	static void GiveWeaponToChar(unsigned int ped, eWeapon weapon, unsigned int ammo, bool unknown0) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_GIVE_WEAPON_TO_CHAR, ped, weapon, ammo, unknown0); }
@@ -83,6 +85,7 @@ namespace CScript
 
 	static bool IsCharInjured(unsigned int ped) { return false; }
 	static bool IsCharInAnyCar(unsigned int ped) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CHAR_IN_ANY_CAR, ped); }
+	static bool IsCharInCar(unsigned int ped, unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CHAR_IN_ANY_CAR, ped, vehicle); }
 	static void BlockPedWeaponSwitching(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_BLOCK_PED_WEAPON_SWITCHING, ped, value); }
 	static void UnlockRagdoll(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_UNLOCK_RAGDOLL, ped, value); }
 	static void SetBlockingOfNonTemporaryEvents(unsigned int ped, bool value) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SET_BLOCKING_OF_NON_TEMPORARY_EVENTS, ped, value); }
@@ -204,6 +207,9 @@ namespace CScript
 	static bool IsCarInAirProper(unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CAR_IN_AIR_PROPER, vehicle); }
 	static void SetVehicleQuaternion(unsigned int vehicle, float rX, float rY, float rZ, float rW) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SET_VEHICLE_QUATERNION, vehicle, rX, rY, rZ, rW); }
 	static void GetVehicleQuaternion(unsigned int vehicle, float * rX, float * rY, float * rZ, float * rW) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_GET_VEHICLE_QUATERNION, vehicle, rX, rY, rZ, rW); }
+	static bool IsCarSirenOn(unsigned int vehicle) { return EFLC::CNativeInvoke::Invoke<bool>(NATIVE_IS_CAR_SIREN_ON, vehicle); }
+	static void SwitchCarSiren(unsigned int vehicle, bool state) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SWITCH_CAR_SIREN, vehicle, state); }
+	static void SoundCarHorn(unsigned int vehicle, int duration = 1500) { EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_SOUND_CAR_HORN, vehicle, duration); }
 
 	// Sound
 	static unsigned int RequestAmbientAudioBank(const char* szAudio) { return EFLC::CNativeInvoke::Invoke<unsigned int>(NATIVE_REQUEST_AMBIENT_AUDIO_BANK, szAudio); }

@@ -160,7 +160,7 @@ public: // Handles "GET" functions
 	inline bool						IsLocalPlayer() { return m_bLocalPlayer; }
 	inline bool						IsSpawned() { return m_bSpawned; }
 	
-	bool							IsInVehicle() { return (m_pVehicle != NULL); }
+	bool							IsInAnyVehicle() { return (m_pVehicle != NULL); }
 	bool							IsPassenger() { return (m_pVehicle != NULL && m_byteSeat != 0); }
 	
 	bool							HasTargetPosition() { return (m_interp.pos.ulFinishTime != 0); }
@@ -285,7 +285,8 @@ protected:
 
 	void							InternalPutInVehicle(CVehicleEntity * pVehicle, BYTE byteSeat);
 	void							InternalRemoveFromVehicle();
-	bool							InternalIsInVehicle();
+	bool							InternalIsInAnyVehicle();
+	bool							InternalIsInVehicle(CVehicleEntity * pVehicle);
 	
 };
 

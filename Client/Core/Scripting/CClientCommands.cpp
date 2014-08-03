@@ -75,7 +75,7 @@ bool CClientCommands::HandleUserInput(CString strCommand, CString strParameters)
 		// Get our local player
 		CLocalPlayer * pLocalPlayer = g_pCore->GetGame()->GetLocalPlayer();
 
-		if (pLocalPlayer->IsInVehicle())
+		if (pLocalPlayer->IsInAnyVehicle())
 		{
 			CVehicleEntity * pVehicle = pLocalPlayer->GetVehicle();
 
@@ -85,8 +85,8 @@ bool CClientCommands::HandleUserInput(CString strCommand, CString strParameters)
 				CVector3 vecRotation;
 				pVehicle->GetRotation(vecRotation);
 				DWORD dwColors[5];
-				pVehicle->GetColors(dwColors[0], dwColors[1], dwColors[2], dwColors[3], dwColors[4]);
-				fprintf_s(file, "createVehicle(%d, %f, %f, %f, %f, %f, %f, %d, %d, %d, %d, %d);%s%s\n", EFLC::CModelManager::ModelHashToVehicleId(pVehicle->GetModelInfo()->GetHash()), vecPosition.fX, vecPosition.fY, vecPosition.fZ, vecRotation.fX, vecRotation.fY, vecRotation.fZ, dwColors[0], dwColors[1], dwColors[2], dwColors[3], dwColors[4], strParameters.GetLength() > 0 ? " // " : "", strParameters.GetLength() > 0 ? strParameters.Get() : "");
+				pVehicle->GetColors(dwColors[0], dwColors[1], dwColors[2], dwColors[3], dwColors[4]);				
+				fprintf_s(file, "createVehicle(%d, %f, %f, %f, %f, %f, %f, %d, %d, %d, %d, %d);%s%s\n", pVehicle->GetGameVehicle()->GetModelIndex(), vecPosition.fX, vecPosition.fY, vecPosition.fZ, vecRotation.fX, vecRotation.fY, vecRotation.fZ, dwColors[0], dwColors[1], dwColors[2], dwColors[3], dwColors[4], strParameters.GetLength() > 0 ? " // " : "", strParameters.GetLength() > 0 ? strParameters.Get() : "");
 			}
 		}
 		else

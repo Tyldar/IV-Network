@@ -15,12 +15,15 @@
 #include <CLogFile.h>
 #include <SharedUtility.h>
 #include <CInput.h>
+#include <md5\md5.h>
 
 void CServerNatives::Register(IScriptVM* pVM)
 {
 	pVM->RegisterFunction("getConfig", GetConfig);
 	pVM->RegisterFunction("getTickCount", GetTickCount);
 	pVM->RegisterFunction("sendConsoleInput", SendConsoleInput);
+	pVM->RegisterFunction("shutdown", Shutdown);
+	pVM->RegisterFunction("md5", GetMD5Hash);
 }
 
 
@@ -110,6 +113,20 @@ int CServerNatives::SendConsoleInput(int * VM)
 	CString strPrint;
 	pVM->Pop(strPrint);
 	CInput::ProcessInput(strPrint);
+
+	pVM->ResetStackIndex();
+
+	return 1;
+}
+
+int CServerNatives::GetMD5Hash(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	CString strToHash;
+	pVM->Pop(strToHash);
+
+	pVM->Push(CString(md5(strToHash.C_String()).c_str()));
 
 	pVM->ResetStackIndex();
 

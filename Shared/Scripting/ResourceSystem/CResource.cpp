@@ -236,7 +236,7 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 		// Call the scripting event
 		CScriptArguments args;
 		args.push(m_strResourceName);
-		CEvents::GetInstance()->Call("resourceStarted", &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
+		CEvents::GetInstance()->Call("resourceStarted", &args, CEventHandler::eEventType::NATIVE_EVENT, GetVM());
 		return true;
 	}
 
@@ -245,6 +245,10 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 
 bool CResource::Stop(bool bStopManually)
 {
+	if (IsLoaded())
+	{
+		DestroyVM();
+	}	
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);
 	return true;
 }
@@ -258,10 +262,10 @@ bool CResource::Unload()
 	return false;
 }
 
-void CResource::Reload()
+bool CResource::Reload()
 {
 	Unload();
-	Load();
+	return Load();
 }
 
 bool CResource::CreateVM()
@@ -294,6 +298,7 @@ bool CResource::CreateVM()
 
 void CResource::DestroyVM()
 {
+	if (m_bLoaded && m_pVM) SAFE_DELETE(m_pVM);
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);
 }
 

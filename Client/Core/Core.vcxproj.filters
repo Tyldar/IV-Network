@@ -476,9 +476,6 @@
     <ClCompile Include="Game\EpisodeManager.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
-    <ClCompile Include="Network\CHttpClient.cpp">
-      <Filter>Source Files\Network</Filter>
-    </ClCompile>
     <ClCompile Include="CTags.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
@@ -923,6 +920,9 @@
     <ClCompile Include="Game\CWeaponHandler.cpp">
       <Filter>Source Files\Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Shared\Network\CHttpClient.cpp">
+      <Filter>Source Files\Network\Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCore.h">
@@ -1344,9 +1344,6 @@
     </ClInclude>
     <ClInclude Include="Game\EpisodeManager.h">
       <Filter>Header Files\Game</Filter>
-    </ClInclude>
-    <ClInclude Include="Network\CHttpClient.h">
-      <Filter>Source Files\Network</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Input.h">
       <Filter>Header Files\Graphics</Filter>
@@ -1839,6 +1836,9 @@
     </ClInclude>
     <ClInclude Include="Game\CWeaponHandler.h">
       <Filter>Header Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Network\CHttpClient.h">
+      <Filter>Header Files\Network\Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

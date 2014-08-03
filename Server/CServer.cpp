@@ -67,11 +67,16 @@ CServer::~CServer()
 	SAFE_DELETE(m_pBlipManager);
 
 	SAFE_DELETE(m_pCheckpointManager);
+
+	SAFE_DELETE(m_pTimerManager);
+
+	SAFE_DELETE(m_pNetworkModule);
 }
 
 void OnCreateVM(IScriptVM* pVM)
 {
 	CScriptClasses::Register(pVM);
+	CServerNatives::Register(pVM);
 }
 
 bool CServer::Startup()
@@ -132,6 +137,8 @@ bool CServer::Startup()
 	CLogFile::Printf(" Stream distance: %i", CVAR_GET_INTEGER("streamdistance"));		
 		
 	CLogFile::Printf(" Max Players: %d", CVAR_GET_INTEGER("maxplayers"));
+
+	CLogFile::Printf(" Namesakes: %d", CVAR_GET_BOOL("namesakes"));
 
 #ifdef _WIN32
         SetConsoleTextAttribute((HANDLE)GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
