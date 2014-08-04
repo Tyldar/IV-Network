@@ -16,6 +16,7 @@
 #include "Entity/Entities.h"
 #include "CTimer.h"
 #include <CXML.h>
+#include <CScriptUtil.h>
 #include <CServer.h>
 
 int IsPlayerConnected(int * VM)
@@ -258,6 +259,50 @@ int OpenXML(int * VM)
 	return 1;
 }
 
+int CreateFolder(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString folderName;
+	pVM->Pop(folderName);
+
+	_mkdir(folderName.C_String());
+
+	pVM->Push(CScriptUtil::ExistsFolder(folderName));
+
+	return 1;
+}
+
+int ExistsFolder(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString folderName;
+	pVM->Pop(folderName);
+
+	pVM->Push(CScriptUtil::ExistsFolder(folderName.C_String()));
+
+	return 1;
+}
+
+int ExistsFile(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString fileName;
+	pVM->Pop(fileName);
+
+	pVM->Push(CScriptUtil::ExistsFile(fileName.C_String()));
+
+	return 1;
+}
+
 class CScriptSQLite
 {
 public:
@@ -286,6 +331,9 @@ void CScriptClasses::Register(IScriptVM * pVM)
 	pVM->RegisterFunction("createBlip", CreateBlip);
 	pVM->RegisterFunction("createTimer", CreateTimer);
 	pVM->RegisterFunction("openXML", OpenXML);
+	pVM->RegisterFunction("createFolder", CreateFolder);
+	pVM->RegisterFunction("existsFolder", ExistsFolder);
+	pVM->RegisterFunction("existsFile", ExistsFile);
 
 #if 0
 	(new CScriptClass<CScriptSQLite>("CSQLite"))->
@@ -313,14 +361,14 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("nodeName", &CScriptXML::nodeName).
 			AddMethod("nodeSetName", &CScriptXML::nodeSetName).
 			AddMethod("nodeContent", &CScriptXML::nodeContent).
-			AddMethod("noteSetContent", &CScriptXML::nodeSetContent).
+			AddMethod("nodeSetContent", &CScriptXML::nodeSetContent).
 			AddMethod("nodeToRoot", &CScriptXML::nodeToRoot).
 			AddMethod("findNode", &CScriptXML::findNode).
 			AddMethod("nextNode", &CScriptXML::nextNode).					
 			AddMethod("previousNode", &CScriptXML::previousNode).
 			AddMethod("childNodeFirst", &CScriptXML::childNodeFirst).
 			AddMethod("nodeParent", &CScriptXML::nodeParent).
-			AddMethod("nodeCleat", &CScriptXML::nodeClear).
+			AddMethod("nodeClear", &CScriptXML::nodeClear).
 			AddMethod("newNode", &CScriptXML::newNode).
 			AddMethod("newComment", &CScriptXML::newComment).
 			AddMethod("lastError", &CScriptXML::lastError).
@@ -382,6 +430,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 
 	{ // ScriptVehicle
 		static CScriptClass<CScriptVehicle>* pScriptVehicle = &(new CScriptClass<CScriptVehicle>("CVehicleEntity"))->
+			AddMethod("deleteVehicle", &CScriptVehicle::DeleteVehicle).
 			AddMethod("setPosition", &CScriptVehicle::SetPosition).
 			AddMethod("getPosition", &CScriptVehicle::GetPosition).
 			AddMethod("setRotation", &CScriptVehicle::SetRotation).

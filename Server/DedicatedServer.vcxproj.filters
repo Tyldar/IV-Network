@@ -647,6 +647,9 @@
     <ClInclude Include="..\Libraries\md5\md5.h">
       <Filter>Libraries\md5</Filter>
     </ClInclude>
+    <ClInclude Include="..\Shared\CScriptUtil.h">
+      <Filter>Header Files\Shared</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Server.rc">

@@ -250,6 +250,7 @@
     <ClInclude Include="..\Libraries\lua\lzio.h" />
     <ClInclude Include="..\Libraries\md5\md5.h" />
     <ClInclude Include="..\Shared\CLibrary.h" />
+    <ClInclude Include="..\Shared\CScriptUtil.h" />
     <ClInclude Include="..\Shared\Network\CBitStream.h" />
     <ClInclude Include="..\Shared\Network\CHttpClient.h" />
     <ClInclude Include="..\Shared\Network\PacketIdentifiers.h" />
