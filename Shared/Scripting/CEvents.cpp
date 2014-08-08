@@ -96,6 +96,24 @@ bool CEvents::Remove(CString strName, CEventHandler* pEventHandler)
 	return false;
 }
 
+bool CEvents::RemoveScript(IScriptVM* pVM){
+	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); ++iter){
+		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end();){
+			if ((*iter2)->GetVM() == pVM)
+				(*iter).second.erase(iter2++);
+			else
+				iter2++;
+		}
+
+		// remove events with no handlers
+		if ((*iter).second.size() == 0)
+			m_Events.erase(iter);
+		else
+			iter++;
+	}
+	return true;
+}
+
 bool CEvents::IsEventRegistered(CString strEventName)
 {
 	if (m_Events.find(strEventName) == m_Events.end())

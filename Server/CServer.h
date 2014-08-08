@@ -75,7 +75,7 @@ private:
 
 	CNetworkModule				* m_pNetworkModule;
 
-
+	unsigned int				m_upTime;
 	unsigned int                m_uiSyncRate = 10;// Seems VS2013 sometimes does not allow C++11 = 20; /** Describes the maximum number of sync packages sent per second per entity */
     unsigned int                m_uiMaximumFPS = 100;// Seems VS2013 sometimes does not allow C++11 = 100;
 
@@ -108,6 +108,8 @@ public:
 	CTimerManager		*GetTimerManager() { return m_pTimerManager; }
 
 	CNetworkModule		*GetNetworkModule() { return m_pNetworkModule; }
+
+	unsigned int		GetUpTime(){ return m_upTime; }
 
 	unsigned GetSyncRate() { return m_uiSyncRate; }
 	void	 SetSyncRate(unsigned int uiSyncRate = 10) { m_uiSyncRate = uiSyncRate; }

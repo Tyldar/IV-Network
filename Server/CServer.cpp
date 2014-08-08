@@ -256,6 +256,7 @@ bool CServer::Startup()
         CLogFile::Print("");
 #endif
 
+	m_upTime = time(0);
 	m_pNetworkModule->Startup();
 
 	return true;

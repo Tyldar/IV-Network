@@ -40,9 +40,12 @@ void CEventNatives::Register(IScriptVM * pVM)
 int CEventNatives::AddEvent(int * VM)
 {
 	GET_VM_UNKNOWN;
-	CString strName;
+	
 	pVM->ResetStackIndex();
+
+	CString strName;
 	pVM->Pop(strName);
+
 	int ref = -1;
 	SQObjectPtr pFunction;
 	if(pVM->GetVMType() == LUA_VM)
@@ -52,7 +55,6 @@ int CEventNatives::AddEvent(int * VM)
 			ref = luaL_ref((lua_State*)VM, LUA_REGISTRYINDEX);
 		}
 	} else {
-		
 		pFunction = stack_get((SQVM*)VM, 3);
 	}
 	pVM->ResetStackIndex();

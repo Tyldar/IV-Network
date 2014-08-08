@@ -31,6 +31,7 @@
 #include "CInput.h"
 #include <CLogFile.h>
 #include <Scripting/CEvents.h>
+#include <ctime>
 #include "CServer.h"
 
 extern bool g_bClose;
@@ -94,6 +95,15 @@ void CInput::ProcessInput(CString strInput)
 		bitStream.Write(0);
 		bitStream.Write(true);
 		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_MESSAGE_TO_ALL), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);		
+	}
+	else if (strCommand == "uptime")
+	{
+		int sec = time(0) - CServer::GetInstance()->GetUpTime();
+		int hh, mm, ss;
+		hh = sec / 3600;
+		mm = (sec - (hh * 3600)) / 60;
+		ss = sec - ((hh * 3600) + (mm * 60));
+		CLogFile::Printf("Server uptime: %d hours, %d minutes, %d seconds", hh, mm, ss);
 	}
 	else if (strCommand == "resources")
 	{
