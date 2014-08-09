@@ -96,7 +96,7 @@ bool CEvents::Remove(CString strName, CEventHandler* pEventHandler)
 	return false;
 }
 
-bool CEvents::RemoveScript(IScriptVM* pVM){
+bool CEvents::RemoveResourceEvents(IScriptVM* pVM){
 	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); ++iter){
 		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end();){
 			if ((*iter2)->GetVM() == pVM)

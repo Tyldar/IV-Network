@@ -162,6 +162,31 @@ public:
 		return 0;
 	}
 
+	static CString DWordToCString(unsigned long ulColor){
+		unsigned long quotient = ulColor;
+		std::string strHex = "";
+		short remainder;
+		while (strHex.length() != 6){
+			remainder = quotient % 16;
+			if (remainder < 10)
+				strHex = std::to_string(remainder) + strHex;
+			else if (remainder == 10)
+				strHex = "A" + strHex;
+			else if (remainder == 11)
+				strHex = "B" + strHex;
+			else if (remainder == 12)
+				strHex = "C" + strHex;
+			else if (remainder == 13)
+				strHex = "D" + strHex;
+			else if (remainder == 14)
+				strHex = "E" + strHex;
+			else if (remainder == 15)
+				strHex = "F" + strHex;
+			quotient = quotient / 16;
+		}
+		return CString(strHex.c_str());
+	}
+
 	int convertFromHex()
     {
 		int value = 0;

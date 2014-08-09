@@ -247,7 +247,7 @@ bool CResource::Stop(bool bStopManually)
 {
 	if (IsLoaded())
 	{
-		CEvents::GetInstance()->RemoveScript(m_pVM);
+		CEvents::GetInstance()->RemoveResourceEvents(m_pVM);
 		DestroyVM();
 	}	
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);

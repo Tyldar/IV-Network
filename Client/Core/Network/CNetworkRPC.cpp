@@ -646,7 +646,7 @@ void SendPlayerMessage(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 		pBitStream->Read(dwColor);
 		pBitStream->Read(bAllowFormatting);
 
-		g_pCore->GetGraphics()->GetChat()->Print(CString("#%x%s", dwColor, sMessage.C_String()));
+		g_pCore->GetGraphics()->GetChat()->Print(CString("#%s%s", CString::DWordToCString(dwColor).C_String(), sMessage.C_String()));
 	}
 }
 
@@ -660,7 +660,7 @@ void SendPlayerMessageToAll(RakNet::BitStream * pBitStream, RakNet::Packet * pPa
 		pBitStream->Read(dwColor);
 		pBitStream->Read(bAllowFormatting);
 
-		g_pCore->GetGraphics()->GetChat()->Print(CString("#%x%s", dwColor, sMessage.C_String()));
+		g_pCore->GetGraphics()->GetChat()->Print(CString("#%s%s", CString::DWordToCString(dwColor).C_String(), sMessage.C_String()));
 }
 
 void SpawnPlayer(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
