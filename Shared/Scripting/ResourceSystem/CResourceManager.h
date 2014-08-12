@@ -37,6 +37,7 @@
 class CResourceManager {
 
 private:
+	CResourceFile::eResourceType	m_resourceManagerType;
 	CString					m_strResourceDirectory;
 	std::list<CResource*>	m_resources;
 	static CResourceManager*s_pInstance;
@@ -45,8 +46,8 @@ private:
 	CreateVM_t						m_fnCreateVM = nullptr;
 
 public:
-	CResourceManager();
-	CResourceManager(CString strResourceDirectory);
+	CResourceManager(CResourceFile::eResourceType resourceManagerType);
+	CResourceManager(CString strResourceDirectory, CResourceFile::eResourceType	resourceManagerType);
 	~CResourceManager();
 
 	void				SetCreateVMCallback(CreateVM_t fnCreateVM) {
@@ -54,6 +55,8 @@ public:
 	}
 
 	static CResourceManager * GetInstance() { return s_pInstance; }
+
+	CResourceFile::eResourceType GetResourceManagerType(){ return m_resourceManagerType; }
 
 	void		SetResourceDirectory(CString strResourceDirectory) { m_strResourceDirectory = strResourceDirectory; }
 	CString		GetResourceDirectory() { return m_strResourceDirectory; }

@@ -71,9 +71,11 @@ void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 		return;
 	}
 
+	// Send only the resources that have client scripts
 	for (auto pResource : CServer::GetInstance()->GetResourceManager()->GetResources())
 	{
-		bitStream.Write(RakNet::RakString(pResource->GetName().C_String()));
+		if (pResource->HasClientScripts())
+			bitStream.Write(RakNet::RakString(pResource->GetName().C_String()));
 	}
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_DOWNLOAD_START), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 }
@@ -504,9 +506,9 @@ void TriggerServerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 	if (pPlayer)
 	{
 		CScriptArguments args;
-		args.push(pPlayer->GetScriptPlayer());
-		CEvents::GetInstance()->Call(eventName.C_String(), &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
-
+		// With this line does the event not works
+		//args.push(pPlayer->GetScriptPlayer());
+		CEvents::GetInstance()->Call(CString(eventName.C_String()), &args, CEventHandler::REMOTE_EVENT, nullptr);
 	}
 }
 

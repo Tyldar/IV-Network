@@ -18,21 +18,22 @@
 
 extern CCore * g_pCore;
 
-int SendMessage(int * VM)
+int SendChatMessage(int * VM)
 {
 	GET_SCRIPT_VM_SAFE;	
 
-	CString sMessage;
-	DWORD dwColor;
-	bool bAllowFormatting;
-	
-	pVM->Pop(sMessage);
-	pVM->Pop(dwColor);
-	pVM->Pop(bAllowFormatting);
-	
-	g_pCore->GetGraphics()->GetChat()->Print(CString("#%x%s", dwColor, sMessage.C_String()));
-
 	pVM->ResetStackIndex();
+
+	CString sMessage;
+	pVM->Pop(sMessage);
+
+	DWORD dwColor;
+	pVM->Pop(dwColor);
+
+	bool bAllowFormatting;
+	pVM->Pop(bAllowFormatting);
+
+	g_pCore->GetGraphics()->GetChat()->Print(CString("#%s%s", CString::DWordToCString(dwColor).C_String(), sMessage.C_String()));
 
 	return 1;
 }
@@ -43,8 +44,6 @@ int GetLocalPlayer(int * VM)
 
 	pVM->PushInstance("CPlayerEntity", g_pCore->GetGame()->GetLocalPlayer());
 
-	pVM->ResetStackIndex();
-
 	return 1;
 }
 
@@ -52,15 +51,14 @@ int TriggerServerEvent(int * VM)
 {
 	GET_SCRIPT_VM_SAFE;
 
-	CString eventName;
+	pVM->ResetStackIndex();
 
+	CString eventName;
 	pVM->Pop(eventName);
 
 	RakNet::BitStream bitStream;
-	bitStream.Write(eventName);
+	bitStream.Write(RakNet::RakString(eventName.C_String()));
 	g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
-
-	pVM->ResetStackIndex();
 
 	return 1;
 }
@@ -71,8 +69,6 @@ int IsChatVisible(int * VM)
 
 	pVM->Push(g_pCore->GetGraphics()->GetChat()->IsVisible());
 
-	pVM->ResetStackIndex();
-
 	return 1;
 }
 
@@ -80,13 +76,12 @@ int SetChatVisible(int * VM)
 {
 	GET_SCRIPT_VM_SAFE;
 
-	bool bVisible;
+	pVM->ResetStackIndex();
 
+	bool bVisible;
 	pVM->Pop(bVisible);
 
 	g_pCore->GetGraphics()->GetChat()->SetVisible(bVisible);
-
-	pVM->ResetStackIndex();
 
 	return 1;
 }
@@ -95,12 +90,7 @@ int IsChatInputVisible(int * VM)
 {
 	GET_SCRIPT_VM_SAFE;
 
-	bool bVisible;
-
-	
 	pVM->Push(g_pCore->GetGraphics()->GetChat()->IsInputVisible());
-
-	pVM->ResetStackIndex();
 
 	return 1;
 }
@@ -111,15 +101,13 @@ int IsMainMenuVisible(int * VM)
 
 	pVM->Push(g_pCore->GetGraphics()->GetMainMenu()->IsMainMenuVisible());
 
-	pVM->ResetStackIndex();
-
 	return 1;
 }
 
 void CScriptClasses::Register(IScriptVM * pVM)
 {
 	pVM->RegisterFunction("getLocalPlayer", GetLocalPlayer);
-	pVM->RegisterFunction("sendMessage", SendMessage);
+	pVM->RegisterFunction("sendMessage", SendChatMessage);
 	pVM->RegisterFunction("triggerServerEvent", TriggerServerEvent);
 	pVM->RegisterFunction("isChatVisible", IsChatVisible);
 	pVM->RegisterFunction("setChatVisible", SetChatVisible);

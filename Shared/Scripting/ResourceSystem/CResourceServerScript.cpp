@@ -27,7 +27,6 @@ bool CResourceServerScript::Start()
 {
 	if (m_resource->GetVM()->LoadScript(m_strShortName))
 	{
-
 		// Call the scripting event
 		CScriptArguments args;
 		args.push(m_strShortName.Get());

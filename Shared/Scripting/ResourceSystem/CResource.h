@@ -39,7 +39,7 @@
 class IScriptVM;
 class CIncludedResource;
 
-enum eResourceScriptType {
+enum eResourceScriptLanguage {
 	LUA_RESOURCE,
 	SQUIRREL_RESOURCE,
 	UNKNOWN,
@@ -54,7 +54,7 @@ private:
 	std::list<CIncludedResource*>	m_includedResources;
 	std::list<CResourceFile *>		m_resourceFiles;
 
-	eResourceScriptType				m_resourceScriptType;
+	eResourceScriptLanguage			m_resourceScriptLanguage;
 	bool							m_bLoaded;
 	bool							m_bActive;
 
@@ -76,7 +76,7 @@ public:
 		m_fnCreateVM = fnCreateVM;
 	}
 
-	eResourceScriptType	GetResourceScriptType() { return m_resourceScriptType; }
+	eResourceScriptLanguage	GetResourceScriptLanguage() { return m_resourceScriptLanguage; }
 	bool				IsLoaded() { return m_bLoaded; }
 	bool				IsActive() { return m_bActive; }
 
@@ -92,8 +92,10 @@ public:
 	bool		Unload();
 	bool		Reload();
 
-	bool		Start(std::list<CResource *> * dependents = NULL, bool bStartManually = false, bool bStartIncludedResources = true);
+	bool		Start(std::list<CResource *> * dependents = NULL, bool bStartManually = false, bool bStartIncludedResources = true, CResourceFile::eResourceType resourceManagerType = CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT);
 	bool		Stop(bool bStopManually = false);
+
+	bool		HasClientScripts();
 
 	std::list<CResource*> *			GetDependents() { return &m_dependents; }
 	int								GetDependentCount() { return m_dependents.size(); }

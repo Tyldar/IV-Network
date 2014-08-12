@@ -396,7 +396,7 @@ void CScriptPlayer::SetHudElementVisible(int componentid, bool visible)
 void CScriptPlayer::TriggerPlayerEvent(CString eventName)
 {
 	RakNet::BitStream bitStream;
-	bitStream.Write(eventName);
+	bitStream.Write(RakNet::RakString(eventName.C_String()));
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, GetEntity()->GetId(), false);
 }
 

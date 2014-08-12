@@ -81,11 +81,10 @@ bool CCore::Initialize()
 	m_pNetworkManager = new CNetworkManager;
 	
 	// Create the event systems instance
-	if (!CEvents::GetInstance())
-		new CEvents;
+	CEvents* pEvents = new CEvents();
 
 	// Create the resource manager instance
-	m_pResourceManager = new CResourceManager("client_resources/resources");
+	m_pResourceManager = new CResourceManager("client_resources/resources", CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT);
 	m_pResourceManager->SetCreateVMCallback(OnCreateVM);
 
 	// Unprotect memory before starting addressing

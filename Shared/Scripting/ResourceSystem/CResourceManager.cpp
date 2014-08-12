@@ -16,16 +16,18 @@
 
 CResourceManager* CResourceManager::s_pInstance = NULL;
 
-CResourceManager::CResourceManager()
+CResourceManager::CResourceManager(CResourceFile::eResourceType resourceManagerType)
 	: m_strResourceDirectory("resources/")
 {
 	s_pInstance = this;
+	m_resourceManagerType = resourceManagerType;
 }
 
-CResourceManager::CResourceManager(CString strResourceDirectory)
+CResourceManager::CResourceManager(CString strResourceDirectory, CResourceFile::eResourceType resourceManagerType)
 	: m_strResourceDirectory(strResourceDirectory)
 {
 	s_pInstance = this;
+	m_resourceManagerType = resourceManagerType;
 }
 
 CResourceManager::~CResourceManager()
@@ -100,7 +102,7 @@ bool CResourceManager::StartResource(CResource * pResource, std::list<CResource*
 		{
 			CLogFile::Printf("Resource reloaded");
 			// Start the resource
-			return pResource->Start(NULL, bStartedManually, bStartIncludedResources);
+			return pResource->Start(NULL, bStartedManually, bStartIncludedResources, m_resourceManagerType);
 		}
 		else
 			return false;
@@ -110,9 +112,8 @@ bool CResourceManager::StartResource(CResource * pResource, std::list<CResource*
 		// If it's not running yet
 		if(!pResource->IsActive())
 		{
-			
 			// Start it
-			if (pResource->Start(dependents, bStartedManually, bStartIncludedResources))
+			if (pResource->Start(dependents, bStartedManually, bStartIncludedResources, m_resourceManagerType))
 			{
 				CLogFile::Printf("Resource started");
 				return true;

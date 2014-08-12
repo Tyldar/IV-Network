@@ -22,6 +22,10 @@ private:
 	static int	TriggerEvent(int * pVM);
 	static int	TriggerGlobalEvent(int * pVM);
 	static int	TriggerRemoteEvent(int * pVM);
+
+	static int	RemoveEvent(int * pVM);
+	static int	RemoveGlobalEvent(int * pVM);
+	static int	RemoveRemoteEvent(int * pVM);
 	
 	static int	AddCommandHandler(int * pVM);
 public:

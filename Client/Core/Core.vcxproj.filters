@@ -509,9 +509,6 @@
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientFile.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientScript.cpp">
-      <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceFile.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
@@ -519,9 +516,6 @@
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceScriptFile.cpp">
-      <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceServerScript.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Shared\CXML.cpp">
@@ -1390,9 +1384,6 @@
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientFile.h">
       <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientScript.h">
-      <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceFile.h">
       <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
@@ -1400,9 +1391,6 @@
       <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceScriptFile.h">
-      <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceServerScript.h">
       <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Shared\CXML.h">
@@ -1842,14 +1830,14 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Libraries\DXSDK\Include\d3dx9math.inl">
-      <Filter>Resources\Libraries\DirectX</Filter>
-    </None>
-    <None Include="..\..\Libraries\DXSDK\Include\D3DX10math.inl">
-      <Filter>Resources\Libraries\DirectX</Filter>
-    </None>
     <None Include="res\exceptbox.aps">
       <Filter>Resources</Filter>
+    </None>
+    <None Include="..\..\Libraries\DXSDK\Include\D3DX10math.inl">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="..\..\Libraries\DXSDK\Include\d3dx9math.inl">
+      <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

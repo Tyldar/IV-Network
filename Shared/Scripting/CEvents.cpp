@@ -12,7 +12,6 @@
 
 CEvents* CEvents::s_pInstance = 0;
 
-
 bool CEvents::Add(CString strName, CEventHandler* pEventHandler)
 {
 	auto itEvent = m_Events.find(strName);
@@ -21,7 +20,6 @@ bool CEvents::Add(CString strName, CEventHandler* pEventHandler)
 		// new - create the event
 		auto ret = m_Events.insert(std::pair<CString, std::list<CEventHandler*>>(strName, std::list<CEventHandler*>()));
 		itEvent = ret.first;
-
 	} else {
 		for(auto pEvent : itEvent->second)
 		{
@@ -37,7 +35,7 @@ bool CEvents::Add(CString strName, CEventHandler* pEventHandler)
 CScriptArguments CEvents::Call(CString strName, CScriptArguments* pArguments, CEventHandler::eEventType EventType, IScriptVM * pVM)
 {
 	CScriptArguments returnArguments;
-	auto itEvent = m_Events.find(strName);	
+	auto itEvent = m_Events.find(strName);
 	if(itEvent != m_Events.end())
 	{
 		CScriptArgument ret;
@@ -70,9 +68,39 @@ CScriptArguments CEvents::Call(CString strName, CScriptArguments* pArguments, CE
 				pEvent->Call(pArguments, &ret);
 				returnArguments.push(ret);
 			}
+			else if (EventType == CEventHandler::REMOTE_EVENT
+				&& pEvent->GetType() == CEventHandler::REMOTE_EVENT)
+			{
+				pEvent->Call(pArguments, &ret);
+				returnArguments.push(ret);
+			}
 		}
 	}
 	return returnArguments;
+}
+
+bool CEvents::RemoveEvent(CString strName, CEventHandler::eEventType eventType, IScriptVM* pVM){
+	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); iter++){
+		if ((*iter).first.Compare(strName) == 0){
+			for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); iter2++){
+				if (eventType == CEventHandler::RESOURCE_EVENT && pVM == (*iter2)->GetVM()){
+					(*iter).second.erase(iter2);
+					// Remove events with no handlers
+					if ((*iter).second.size() == 0)
+						m_Events.erase(iter);
+					return true;
+				}
+				else if ((*iter2)->GetType() == eventType && pVM == nullptr){
+					(*iter).second.erase(iter2);
+					// Remove events with no handlers
+					if ((*iter).second.size() == 0)
+						m_Events.erase(iter);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 bool CEvents::Remove(CString strName, CEventHandler* pEventHandler)
@@ -105,7 +133,7 @@ bool CEvents::RemoveResourceEvents(IScriptVM* pVM){
 				iter2++;
 		}
 
-		// remove events with no handlers
+		// Remove events with no handlers
 		if ((*iter).second.size() == 0)
 			m_Events.erase(iter);
 		else

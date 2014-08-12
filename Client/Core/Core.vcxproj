@@ -212,11 +212,9 @@
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CIncludedResource.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResource.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientFile.cpp" />
-    <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientScript.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceFile.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceManager.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceScriptFile.cpp" />
-    <ClCompile Include="..\..\Shared\Scripting\ResourceSystem\CResourceServerScript.cpp" />
     <ClCompile Include="..\..\Shared\SharedUtility.cpp" />
     <ClCompile Include="..\..\Shared\Threading\CMutex.cpp" />
     <ClCompile Include="..\..\Shared\Threading\CThread.cpp" />
@@ -504,11 +502,9 @@
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CIncludedResource.h" />
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResource.h" />
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientFile.h" />
-    <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceClientScript.h" />
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceFile.h" />
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceManager.h" />
     <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceScriptFile.h" />
-    <ClInclude Include="..\..\Shared\Scripting\ResourceSystem\CResourceServerScript.h" />
     <ClInclude Include="CCore.h" />
     <ClInclude Include="Game\CCamera.h" />
     <ClInclude Include="Game\CCharacterManager.h" />

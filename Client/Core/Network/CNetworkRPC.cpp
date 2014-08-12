@@ -42,6 +42,23 @@ bool   CNetworkRPC::m_bRegistered = false;
 
 std::vector<CString> vecClientResources;
 
+TransferCB transferCallback;
+void DownloadStart(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	vecClientResources.clear();
+
+	RakNet::RakString strResource;
+	while (pBitStream->Read(strResource))
+	{
+		vecClientResources.push_back(strResource.C_String());
+	}
+
+	const auto pDelta = g_pCore->GetNetworkManager()->GetDirectoryDeltaTransfer();
+	CString strPath = CString("client_resources/%s", SharedUtility::ConvertStringToPath(g_pCore->GetNetworkManager()->GetServerAddress().ToString(true, ':')).Get());
+	pDelta->DownloadFromSubdirectory("client_files", SharedUtility::GetAbsolutePath(strPath.Get()).Get(), false, g_pCore->GetNetworkManager()->GetServerAddress(), &transferCallback, HIGH_PRIORITY, 0, NULL);
+	g_pCore->GetResourceManager()->SetResourceDirectory(strPath + "/resources/");
+}
+
 void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	// Read the player id
@@ -698,7 +715,7 @@ void TriggerPlayerEvent(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket
 	pBitStream->Read(eventName);
 
 	CScriptArguments args;
-	CEvents::GetInstance()->Call(eventName.C_String(), &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
+	CEvents::GetInstance()->Call(CString(eventName.C_String()), &args, CEventHandler::REMOTE_EVENT, nullptr);
 }
 
 void KickNotification(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -1075,24 +1092,6 @@ void SetVehicleDirtLevel(RakNet::BitStream * pBitStream, RakNet::Packet * pPacke
 
 		pVehicle->SetDirtLevel(iDirtLevel);
 	}
-}
-
-TransferCB transferCallback;
-
-void DownloadStart(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	vecClientResources.clear();
-
-	RakNet::RakString strResource;
-	while (pBitStream->Read(strResource))
-	{
-		vecClientResources.push_back(strResource.C_String());
-	}
-
-	const auto pDelta = g_pCore->GetNetworkManager()->GetDirectoryDeltaTransfer();
-	CString strPath = CString("client_resources/%s", SharedUtility::ConvertStringToPath(g_pCore->GetNetworkManager()->GetServerAddress().ToString(true, ':')).Get());
-	pDelta->DownloadFromSubdirectory("client_files", SharedUtility::GetAbsolutePath(strPath.Get()).Get(), false, g_pCore->GetNetworkManager()->GetServerAddress(), &transferCallback, HIGH_PRIORITY, 0, NULL);
-	g_pCore->GetResourceManager()->SetResourceDirectory(strPath);
 }
 
 void GetCheckpoints(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)

@@ -345,16 +345,10 @@
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceClientFile.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
-    <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceClientScript.cpp">
-      <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClCompile>
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceFile.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceScriptFile.cpp">
-      <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceServerScript.cpp">
       <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
     </ClCompile>
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CIncludedResource.cpp">
@@ -486,12 +480,6 @@
       <Filter>Header Files\Shared\Scripting</Filter>
     </ClInclude>
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceScriptFile.h">
-      <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceClientScript.h">
-      <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceServerScript.h">
       <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceClientFile.h">
@@ -646,9 +634,6 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\md5\md5.h">
       <Filter>Libraries\md5</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Shared\CScriptUtil.h">
-      <Filter>Header Files\Shared</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

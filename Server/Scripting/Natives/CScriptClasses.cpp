@@ -16,7 +16,6 @@
 #include "Entity/Entities.h"
 #include "CTimer.h"
 #include <CXML.h>
-#include <CScriptUtil.h>
 #include <CServer.h>
 
 int IsPlayerConnected(int * VM)
@@ -268,37 +267,23 @@ int CreateFolder(int * VM)
 	CString folderName;
 	pVM->Pop(folderName);
 
-	_mkdir(folderName.C_String());
+	SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(folderName));
 
-	pVM->Push(CScriptUtil::ExistsFolder(folderName));
+	pVM->Push(SharedUtility::Exists(SharedUtility::GetAbsolutePath(folderName)));
 
 	return 1;
 }
 
-int ExistsFolder(int * VM)
+int Exists(int * VM)
 {
 	GET_SCRIPT_VM_SAFE;
 
 	pVM->ResetStackIndex();
 
-	CString folderName;
-	pVM->Pop(folderName);
+	CString pathName;
+	pVM->Pop(pathName);
 
-	pVM->Push(CScriptUtil::ExistsFolder(folderName.C_String()));
-
-	return 1;
-}
-
-int ExistsFile(int * VM)
-{
-	GET_SCRIPT_VM_SAFE;
-
-	pVM->ResetStackIndex();
-
-	CString fileName;
-	pVM->Pop(fileName);
-
-	pVM->Push(CScriptUtil::ExistsFile(fileName.C_String()));
+	pVM->Push(SharedUtility::Exists(SharedUtility::GetAbsolutePath("/%s", pathName.C_String())));
 
 	return 1;
 }
@@ -332,8 +317,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 	pVM->RegisterFunction("createTimer", CreateTimer);
 	pVM->RegisterFunction("openXML", OpenXML);
 	pVM->RegisterFunction("createFolder", CreateFolder);
-	pVM->RegisterFunction("existsFolder", ExistsFolder);
-	pVM->RegisterFunction("existsFile", ExistsFile);
+	pVM->RegisterFunction("exists", Exists);
 
 #if 0
 	(new CScriptClass<CScriptSQLite>("CSQLite"))->

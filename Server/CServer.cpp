@@ -176,7 +176,7 @@ bool CServer::Startup()
 
 		CLogFile::Print("");
 	}
-	m_pResourceManager = new CResourceManager("resources");
+	m_pResourceManager = new CResourceManager("resources", CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT);
 	m_pResourceManager->SetCreateVMCallback(OnCreateVM);
 
 	// Loading resources
@@ -227,16 +227,36 @@ bool CServer::Startup()
 	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY "/resources");
 	for (auto pResource : m_pResourceManager->GetResources())
 	{
+		TiXmlDocument doc;
+		TiXmlElement* metaElement = new TiXmlElement("meta");
 		for (auto pFile : *pResource->GetResourceFiles())
 		{
-			if (pFile->GetType() == CResourceFile::eResourceType::RESOURCE_FILE_TYPE_CLIENT_SCRIPT)
+			if (pFile->GetType() == CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT)
 			{
-				SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/", pResource->GetName().C_String()).C_String());
-				SharedUtility::CopyFile(pFile->GetFileName(), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/%s", pResource->GetName().C_String(), pFile->GetName()));
+				if (metaElement->NoChildren()){
+					// Create the info element
+					TiXmlElement* infoElement = new TiXmlElement("info");
+					if (pResource->GetResourceScriptLanguage() == eResourceScriptLanguage::LUA_RESOURCE)
+						infoElement->SetAttribute("scriptType", "Lua");
+					else if (pResource->GetResourceScriptLanguage() == eResourceScriptLanguage::SQUIRREL_RESOURCE)
+						infoElement->SetAttribute("scriptType", "Squirrel");
+					metaElement->LinkEndChild(infoElement);
 
-				// TODO: construct meta.xml for clients
-				SharedUtility::CopyFile(SharedUtility::GetAbsolutePath("/resources/%s/meta.xml", pResource->GetName().C_String()), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/meta.xml", pResource->GetName().C_String()));
+					// Create the directory for client resources
+					SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/", pResource->GetName().C_String()).C_String());
+				}
+				TiXmlElement* scriptElement = new TiXmlElement("script");
+				scriptElement->SetAttribute("src", SharedUtility::FileNameFromPath(pFile->GetName()).C_String());
+				scriptElement->SetAttribute("type", "client");
+				metaElement->LinkEndChild(scriptElement);
+
+				// Copy the script into the directory created
+				SharedUtility::CopyFile(SharedUtility::GetAbsolutePath("resources/%s/%s", pResource->GetName().C_String(), pFile->GetName()).C_String(), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/%s", pResource->GetName().C_String(), SharedUtility::FileNameFromPath(pFile->GetName()).C_String()));
 			}
+		}
+		if (!metaElement->NoChildren()){
+			doc.LinkEndChild(metaElement);
+			doc.SaveFile(CString(CLIENT_FILE_DIRECTORY "/resources/%s/meta.xml", pResource->GetName().C_String()).C_String());
 		}
 	}
 
