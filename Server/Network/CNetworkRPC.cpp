@@ -74,7 +74,7 @@ void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	// Send only the resources that have client scripts
 	for (auto pResource : CServer::GetInstance()->GetResourceManager()->GetResources())
 	{
-		if (pResource->HasClientScripts())
+		if (pResource->HasClientResourceFilesScripts())
 			bitStream.Write(RakNet::RakString(pResource->GetName().C_String()));
 	}
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_DOWNLOAD_START), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
@@ -120,9 +120,7 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	// Add the player to the manager
 	// TODO: add to player manager
 	CPlayerEntity * pPlayer = new CPlayerEntity();
-
 	pPlayer->SetName(strName);
-	
 	pPlayer->SetSerial(strSerial.Get());
 
 	// Do we need the id; maybe internal for easier sync but definetly not public to the scripting engine
@@ -274,6 +272,24 @@ void DownloadFinished(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	}
 	if (bitStream.GetNumberOfBitsUsed()) CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_GET_VEHICLES), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 
+}
+
+void DownloadResourceFiles(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Get the playerid
+	EntityId playerId = (EntityId)pPacket->guid.systemIndex;
+
+	// Read the input
+	RakNet::RakString resourceName;
+	pBitStream->Read(resourceName);
+
+	CResource* resource = CServer::GetInstance()->GetResourceManager()->GetResource(resourceName.C_String());
+
+	RakNet::BitStream pBitStreamList;
+	pBitStreamList.Write(resourceName);
+	CServer::GetInstance()->GetResourceManager()->GetResourceFileList(resource)->Serialize(&pBitStreamList);
+
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES), &pBitStreamList, HIGH_PRIORITY, RELIABLE_ORDERED, playerId, false);
 }
 
 void PlayerChat(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -576,6 +592,9 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_INITIAL_DATA), InitialData);
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_FINISH), DownloadFinished);
 
+	// Resource RCPs
+	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES), DownloadResourceFiles);
+
 	// Player rpcs
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_PLAYER_CHAT), PlayerChat);
 	pRPC->RegisterFunction(GET_RPC_CODEX(RPC_SYNC_PACKAGE), PlayerSync);
@@ -598,6 +617,9 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 	// Default rpcs
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_INITIAL_DATA));
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_FINISH));
+
+	// Resource RCPs
+	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES));
 
 	// Player rpcs
 	pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_PLAYER_CHAT));

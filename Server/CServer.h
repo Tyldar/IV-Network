@@ -37,7 +37,7 @@
 #endif
 #include "Common.h"
 
-#include <Scripting/ResourceSystem/CResourceManager.h>
+#include "Scripting/ResourceSystem/CResourceServerManager.h"
 
 #include <Entity/CEntityManager.h>
 #include <Entity/Entities.h>
@@ -59,7 +59,7 @@ class CServer {
 private:
 	static CServer				* s_pInstance;
 
-	CResourceManager			* m_pResourceManager;
+	CResourceServerManager		* m_pResourceManager;
 
 	CPlayerManager				* m_pPlayerManager;
 	CVehicleManager				* m_pVehicleManager;
@@ -93,7 +93,7 @@ public:
 	void	Process();
 	void	Shutdown();
 
-	CResourceManager	*GetResourceManager() { return CResourceManager::GetInstance(); }
+	CResourceServerManager	*GetResourceManager() { return CResourceServerManager::GetInstance(); }
 
 	CPlayerManager		*GetPlayerManager() { return m_pPlayerManager; }
 	CVehicleManager		*GetVehicleManager() { return m_pVehicleManager; }

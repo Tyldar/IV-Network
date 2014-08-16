@@ -219,6 +219,7 @@
     <ClCompile Include="Network\CNetworkRPC.cpp" />
     <ClCompile Include="Scripting\Natives\CScriptClasses.cpp" />
     <ClCompile Include="Scripting\Natives\CServerNatives.cpp" />
+    <ClCompile Include="Scripting\ResourceSystem\CResourceServerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\lua\lapi.h" />
@@ -296,6 +297,7 @@
     <ClInclude Include="Scripting\Natives\CScriptNatives.h" />
     <ClInclude Include="Scripting\Natives\CServerNatives.h" />
     <ClInclude Include="Scripting\Natives\Natives_Server.h" />
+    <ClInclude Include="Scripting\ResourceSystem\CResourceServerManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Server.rc" />

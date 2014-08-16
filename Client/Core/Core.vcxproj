@@ -197,6 +197,7 @@
     <ClCompile Include="..\..\Shared\CZlib.cpp" />
     <ClCompile Include="..\..\Shared\Game\CTrafficLights.cpp" />
     <ClCompile Include="..\..\Shared\Network\CBitStream.cpp" />
+    <ClCompile Include="..\..\Shared\Network\CFileListTransferCBInterface.cpp" />
     <ClCompile Include="..\..\Shared\Network\CHttpClient.cpp" />
     <ClCompile Include="..\..\Shared\Patcher\CPatcher.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ApplyTuple.cpp" />
@@ -481,6 +482,7 @@
     <ClInclude Include="..\..\Shared\Game\CTrafficLights.h" />
     <ClInclude Include="..\..\Shared\Game\eGame.h" />
     <ClInclude Include="..\..\Shared\Network\CBitStream.h" />
+    <ClInclude Include="..\..\Shared\Network\CFileListTransferCBInterface.h" />
     <ClInclude Include="..\..\Shared\Network\CHttpClient.h" />
     <ClInclude Include="..\..\Shared\Network\CPacketIdentifiers.h" />
     <ClInclude Include="..\..\Shared\Network\CRPCIdentifiers.h" />

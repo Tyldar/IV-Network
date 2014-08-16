@@ -917,6 +917,9 @@
     <ClCompile Include="..\..\Shared\Network\CHttpClient.cpp">
       <Filter>Source Files\Network\Shared</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Shared\Network\CFileListTransferCBInterface.cpp">
+      <Filter>Source Files\Network\Shared</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCore.h">
@@ -1826,6 +1829,9 @@
       <Filter>Header Files\Game</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Shared\Network\CHttpClient.h">
+      <Filter>Header Files\Network\Shared</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Shared\Network\CFileListTransferCBInterface.h">
       <Filter>Header Files\Network\Shared</Filter>
     </ClInclude>
   </ItemGroup>

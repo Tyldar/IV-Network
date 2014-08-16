@@ -57,6 +57,7 @@ private:
 	eResourceScriptLanguage			m_resourceScriptLanguage;
 	bool							m_bLoaded;
 	bool							m_bActive;
+	bool							m_bHasClientResourceFiles;
 
 	unsigned int					m_uiVersionMajor;
 	unsigned int					m_uiVersionMinor;
@@ -95,7 +96,7 @@ public:
 	bool		Start(std::list<CResource *> * dependents = NULL, bool bStartManually = false, bool bStartIncludedResources = true, CResourceFile::eResourceType resourceManagerType = CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT);
 	bool		Stop(bool bStopManually = false);
 
-	bool		HasClientScripts();
+	bool		HasClientResourceFilesScripts(){ return m_bHasClientResourceFiles; }
 
 	std::list<CResource*> *			GetDependents() { return &m_dependents; }
 	int								GetDependentCount() { return m_dependents.size(); }

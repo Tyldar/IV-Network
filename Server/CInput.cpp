@@ -94,7 +94,7 @@ void CInput::ProcessInput(CString strInput)
 		bitStream.Write(RakNet::RakString(strParameters.Get()));
 		bitStream.Write(0);
 		bitStream.Write(true);
-		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_MESSAGE_TO_ALL), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);		
+		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_MESSAGE_TO_ALL), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 	}
 	else if (strCommand == "uptime")
 	{
@@ -119,8 +119,16 @@ void CInput::ProcessInput(CString strInput)
 
 		if (CResource* pResource = CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters))
 		{
-			if (!CServer::GetInstance()->GetResourceManager()->StartResource(pResource))
+			if (!CServer::GetInstance()->GetResourceManager()->StartServerResource(pResource))
 				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+			else if(pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				// Send the name of the loaded resource to the client
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetResourceManager()->GetResourceFileList(pResource)->Serialize(&bitStream);
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_LOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
 		}
 		else
 			CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
@@ -134,17 +142,45 @@ void CInput::ProcessInput(CString strInput)
 		if (pResource == nullptr)
 			pResource = CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters);
 		else
+		{
+		if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
 			CServer::GetInstance()->GetResourceManager()->Reload(pResource);
+		}
 
-		if (!CServer::GetInstance()->GetResourceManager()->StartResource(pResource))
+		if (!CServer::GetInstance()->GetResourceManager()->StartServerResource(pResource))
 				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+		else if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+		{
+			// Send the name of the loaded resource to the client
+			RakNet::BitStream bitStream;
+			bitStream.Write(RakNet::RakString(strParameters.Get()));
+			CServer::GetInstance()->GetResourceManager()->GetResourceFileList(pResource)->Serialize(&bitStream);
+			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_LOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+		}
 	}
 	else if (strCommand == "unloadresource")
 	{
 		if (strParameters.IsEmpty()) return;
-		if (!CServer::GetInstance()->GetResourceManager()->GetResource(strParameters)) return;
 
-		CServer::GetInstance()->GetResourceManager()->Unload(CServer::GetInstance()->GetResourceManager()->GetResource(strParameters));
+		CResource* pResource = CServer::GetInstance()->GetResourceManager()->GetResource(strParameters);
+		if (pResource)
+		{
+			if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				// Send the name of the unloaded resource to the client
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
+			CServer::GetInstance()->GetResourceManager()->Unload(pResource);
+		}
+		else
+			return;
 	}
 	else if (strCommand == "players")
 	{

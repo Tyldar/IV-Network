@@ -408,6 +408,9 @@
     <ClCompile Include="Network\CMasterList.cpp">
       <Filter>Source Files\Network</Filter>
     </ClCompile>
+    <ClCompile Include="Scripting\ResourceSystem\CResourceServerManager.cpp">
+      <Filter>Source Files\Shared\Scripting\ResourceSystem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CServer.h">
@@ -634,6 +637,9 @@
     </ClInclude>
     <ClInclude Include="..\Libraries\md5\md5.h">
       <Filter>Libraries\md5</Filter>
+    </ClInclude>
+    <ClInclude Include="Scripting\ResourceSystem\CResourceServerManager.h">
+      <Filter>Header Files\Shared\Scripting\ResourceSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

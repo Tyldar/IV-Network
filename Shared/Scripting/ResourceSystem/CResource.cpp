@@ -206,7 +206,15 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 
 		for(auto pResourceFile : m_resourceFiles)
 		{
-			if (pResourceFile->GetType() == resourceManagerType){
+			switch (pResourceFile->GetType())
+			{
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_CONFIG:
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_FILE:
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT:
+				m_bHasClientResourceFiles = true;
+			}
+			if (pResourceFile->GetType() == resourceManagerType)
+			{
 				if (!pResourceFile->Start())
 				{
 					// Stop all the resource items without any warnings
@@ -261,6 +269,7 @@ bool CResource::Stop(bool bStopManually)
 	if (IsLoaded())
 	{
 		CEvents::GetInstance()->RemoveResourceEvents(m_pVM);
+		CLogFile::Print("Events deleted!!\n");
 		DestroyVM();
 	}	
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);
@@ -320,14 +329,4 @@ void CResource::AddDependent(CResource* pResource)
 {
 	if(std::find(m_dependents.begin(), m_dependents.end(), pResource) != m_dependents.end())
 		m_dependents.push_back(pResource);
-}
-
-bool CResource::HasClientScripts(){
-	for (auto pResourceFile : m_resourceFiles)
-	{
-		if (pResourceFile->GetType() == CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT){
-			return true;
-		}
-	}
-	return false;
 }

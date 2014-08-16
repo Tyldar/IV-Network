@@ -176,7 +176,7 @@ bool CServer::Startup()
 
 		CLogFile::Print("");
 	}
-	m_pResourceManager = new CResourceManager("resources", CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT);
+	m_pResourceManager = new CResourceServerManager();
 	m_pResourceManager->SetCreateVMCallback(OnCreateVM);
 
 	// Loading resources
@@ -203,9 +203,9 @@ bool CServer::Startup()
 		if(!strResource.IsEmpty())
 		{
 			CLogFile::Printf("Loading resource (%s)", strResource.C_String());
-			if(CResource* pResource = m_pResourceManager->Load(SharedUtility::GetAbsolutePath(m_pResourceManager->GetResourceDirectory()),strResource))
+			if (CResource* pResource = m_pResourceManager->Load(SharedUtility::GetAbsolutePath(m_pResourceManager->GetResourceDirectory()), strResource))
 			{
-				if (!m_pResourceManager->StartResource(pResource))
+				if (!m_pResourceManager->StartServerResource(pResource))
 				{
 					CLogFile::Printf("Warning: Failed to load resource %s.", strResource.Get());
 					iFailedResources++;
@@ -221,48 +221,13 @@ bool CServer::Startup()
 			}
 		}
 	}
-#define CLIENT_FILE_DIRECTORY "client_files"
-	
-	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY);
-	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY "/resources");
-	for (auto pResource : m_pResourceManager->GetResources())
-	{
-		TiXmlDocument doc;
-		TiXmlElement* metaElement = new TiXmlElement("meta");
-		for (auto pFile : *pResource->GetResourceFiles())
-		{
-			if (pFile->GetType() == CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT)
-			{
-				if (metaElement->NoChildren()){
-					// Create the info element
-					TiXmlElement* infoElement = new TiXmlElement("info");
-					if (pResource->GetResourceScriptLanguage() == eResourceScriptLanguage::LUA_RESOURCE)
-						infoElement->SetAttribute("scriptType", "Lua");
-					else if (pResource->GetResourceScriptLanguage() == eResourceScriptLanguage::SQUIRREL_RESOURCE)
-						infoElement->SetAttribute("scriptType", "Squirrel");
-					metaElement->LinkEndChild(infoElement);
-
-					// Create the directory for client resources
-					SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/", pResource->GetName().C_String()).C_String());
-				}
-				TiXmlElement* scriptElement = new TiXmlElement("script");
-				scriptElement->SetAttribute("src", SharedUtility::FileNameFromPath(pFile->GetName()).C_String());
-				scriptElement->SetAttribute("type", "client");
-				metaElement->LinkEndChild(scriptElement);
-
-				// Copy the script into the directory created
-				SharedUtility::CopyFile(SharedUtility::GetAbsolutePath("resources/%s/%s", pResource->GetName().C_String(), pFile->GetName()).C_String(), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/%s", pResource->GetName().C_String(), SharedUtility::FileNameFromPath(pFile->GetName()).C_String()));
-			}
-		}
-		if (!metaElement->NoChildren()){
-			doc.LinkEndChild(metaElement);
-			doc.SaveFile(CString(CLIENT_FILE_DIRECTORY "/resources/%s/meta.xml", pResource->GetName().C_String()).C_String());
-		}
-	}
 
 	CLogFile::Printf("Successfully loaded %d resources (%d failed).", iResourcesLoaded, iFailedResources);
+	
+#define CLIENT_FILE_DIRECTORY "client_files"
 
-	m_pNetworkModule->GetDirectoryDeltaTransfer()->AddUploadsFromSubdirectory(CLIENT_FILE_DIRECTORY);
+	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY);
+	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY "/resources");
 
 #ifdef _WIN32
         SetConsoleTextAttribute((HANDLE)GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);

@@ -17,9 +17,9 @@
 
 // Helper macro creates a pVM from unknown vm given by the native
 #define GET_VM_UNKNOWN CResource* pResource = CResourceManager::GetInstance()->Get(VM); \
-					   if(!pResource) \
+						if(!pResource) \
 					       return 1; \
-					   IScriptVM * pVM = pResource->GetVM();
+						IScriptVM * pVM = pResource->GetVM();
 
 #define DEPRECATED(x) CLogFile::Printf("%s is deprecated", x);
 #define NOT_IMPLEMENTED(x) CLogFile::Printf("%s is not implemented", x);
@@ -50,14 +50,16 @@ int CEventNatives::AddEvent(int * VM)
 	CString strName;
 	pVM->Pop(strName);
 
-	SQObjectPtr pFunction;
+	HSQOBJECT pFunction;
 	int ref = -1;
 
 	if (pVM->GetVMType() == LUA_VM && lua_isfunction((lua_State*)VM, 2)){
 		ref = luaL_ref((lua_State*)VM, LUA_REGISTRYINDEX);
 	}
 	else if (pVM->GetVMType() == SQUIRREL_VM){
-		pFunction = stack_get((SQVM*)VM, 3);
+		sq_resetobject(&pFunction);
+		sq_getstackobj(((CSquirrelVM*)pVM)->GetVM(), 3, &pFunction);
+		sq_addref(((CSquirrelVM*)pVM)->GetVM(), &pFunction);
 	}
 
 	CEventHandler * pEvent = new CEventHandler(pVM, ref, pFunction, CEventHandler::RESOURCE_EVENT);
@@ -75,14 +77,16 @@ int CEventNatives::AddGlobalEvent(int * VM)
 	CString strName;
 	pVM->Pop(strName);
 
-	SQObjectPtr pFunction;
+	HSQOBJECT pFunction;
 	int ref = -1;
 
 	if (pVM->GetVMType() == LUA_VM && lua_isfunction((lua_State*)VM, 2)){
 		ref = luaL_ref((lua_State*)VM, LUA_REGISTRYINDEX);
 	}
 	else if (pVM->GetVMType() == SQUIRREL_VM){
-		pFunction = stack_get((SQVM*)VM, 3);
+		sq_resetobject(&pFunction);
+		sq_getstackobj(((CSquirrelVM*)pVM)->GetVM(), 3, &pFunction);
+		sq_addref(((CSquirrelVM*)pVM)->GetVM(), &pFunction);
 	}
 
 	CEventHandler * pEvent = new CEventHandler(pVM, ref, pFunction, CEventHandler::GLOBAL_EVENT);
@@ -100,14 +104,16 @@ int CEventNatives::AddRemoteEvent(int * VM)
 	CString strName;
 	pVM->Pop(strName);
 
-	SQObjectPtr pFunction;
+	HSQOBJECT pFunction;
 	int ref = -1;
 
 	if (pVM->GetVMType() == LUA_VM && lua_isfunction((lua_State*)VM, 2)){
 		ref = luaL_ref((lua_State*)VM, LUA_REGISTRYINDEX);
 	}
 	else if (pVM->GetVMType() == SQUIRREL_VM){
-		pFunction = stack_get((SQVM*)VM, 3);
+		sq_resetobject(&pFunction);
+		sq_getstackobj(((CSquirrelVM*)pVM)->GetVM(), 3, &pFunction);
+		sq_addref(((CSquirrelVM*)pVM)->GetVM(), &pFunction);
 	}
 
 	CEventHandler * pEvent = new CEventHandler(pVM, ref, pFunction, CEventHandler::REMOTE_EVENT);
@@ -202,14 +208,16 @@ int CEventNatives::AddCommandHandler(int * VM)
 	CString strName;
 	pVM->Pop(strName);
 
-	SQObjectPtr pFunction;
+	HSQOBJECT pFunction;
 	int ref = -1;
 
 	if (pVM->GetVMType() == LUA_VM && lua_isfunction((lua_State*)VM, 2)){
 		ref = luaL_ref((lua_State*)VM, LUA_REGISTRYINDEX);
 	}
 	else if (pVM->GetVMType() == SQUIRREL_VM){
-		pFunction = stack_get((SQVM*)VM, 3);
+		sq_resetobject(&pFunction);
+		sq_getstackobj(((CSquirrelVM*)pVM)->GetVM(), 3, &pFunction);
+		sq_addref(((CSquirrelVM*)pVM)->GetVM(), &pFunction);
 	}
 	
 	strName.Format("CMD_%s", strName.C_String());

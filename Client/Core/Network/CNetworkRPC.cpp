@@ -51,12 +51,31 @@ void DownloadStart(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	while (pBitStream->Read(strResource))
 	{
 		vecClientResources.push_back(strResource.C_String());
+		CLogFile::Printf("Downloading resource %s...", strResource.C_String());
+		RakNet::BitStream bitStream;
+		bitStream.Write(RakNet::RakString(strResource.C_String()));
+		g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
 	}
 
-	const auto pDelta = g_pCore->GetNetworkManager()->GetDirectoryDeltaTransfer();
+	CLogFile::Printf("Download complete.\n");
+	// Send to the server
+	RakNet::BitStream bitStream;
+	// Write the player nickname
+	bitStream.Write(RakNet::RakString(g_pCore->GetGame()->GetLocalPlayer()->GetNick().Get()));
+	// Write the player serial
+	bitStream.Write(RakNet::RakString(SharedUtility::GetSerialHash().Get()));
+
+	g_pCore->GetNetworkManager()->Call(GET_RPC_CODEX(RPC_DOWNLOAD_FINISH), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, true);
+
+	CString strPath = CString("client_resources/%s", SharedUtility::ConvertStringToPath(g_pCore->GetNetworkManager()->GetServerAddress().ToString(true, ':')).Get());
+	g_pCore->GetResourceManager()->SetResourceDirectory(strPath + "/resources/");
+	CLogFile::Printf("Resources Directory: %s", SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory()).Get());
+
+	// Delta transfer
+	/*const auto pDelta = g_pCore->GetNetworkManager()->GetDirectoryDeltaTransfer();
 	CString strPath = CString("client_resources/%s", SharedUtility::ConvertStringToPath(g_pCore->GetNetworkManager()->GetServerAddress().ToString(true, ':')).Get());
 	pDelta->DownloadFromSubdirectory("client_files", SharedUtility::GetAbsolutePath(strPath.Get()).Get(), false, g_pCore->GetNetworkManager()->GetServerAddress(), &transferCallback, HIGH_PRIORITY, 0, NULL);
-	g_pCore->GetResourceManager()->SetResourceDirectory(strPath + "/resources/");
+	g_pCore->GetResourceManager()->SetResourceDirectory(strPath + "/resources/");*/
 }
 
 void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
@@ -133,6 +152,245 @@ void InitialData(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 	EFLC::CScript::DoScreenFadeOutUnhacked(0);
 }
 
+void PlayerJoin(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the playerid
+	EntityId playerId;
+	pBitStream->Read(playerId);
+
+	if (playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId()) return;
+
+	// Read the player name
+	RakNet::RakString _strName;
+	pBitStream->Read(_strName);
+	CString strPlayerName(_strName.C_String());
+
+	unsigned int uiColor;
+	pBitStream->Read(uiColor);
+
+	// Add the player
+	CPlayerEntity * pEntity = new CPlayerEntity;
+
+	pEntity->SetModel(0);
+
+	pEntity->Create();
+	pEntity->SetNick(strPlayerName);
+	pEntity->SetId(playerId);
+	pEntity->SetColor(uiColor);
+
+	// Notify the playermanager that we're having a new player
+	g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
+}
+
+void PlayerChat(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the playerid
+	EntityId playerId;
+	pBitStream->Read(playerId);
+
+	// Read the input
+	RakNet::RakString strInput;
+	pBitStream->Read(strInput);
+
+	// Is the player active?
+	if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(playerId))
+	{
+		// Get the player pointer
+		CPlayerEntity * pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId);
+
+		// Is the player pointer valid?
+		if (pPlayer)
+		{
+			// Output the message
+			g_pCore->GetGraphics()->GetChat()->Print(CString("#%s%s#FFFFFF: %s", CString::DecimalToString(pPlayer->GetColor()).Get(), pPlayer->GetNick().Get(), strInput.C_String()));
+		}
+	}
+}
+
+void PlayerLeave(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the playerid
+	EntityId playerId;
+	pBitStream->Read(playerId);
+
+	// Remove the player from the player manager
+	g_pCore->GetGame()->GetPlayerManager()->Delete(playerId);
+}
+
+void RecieveSyncPackage(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	// Read the playerid
+	EntityId playerId;
+	pBitStream->Read(playerId);
+
+	// Read the player ping
+	int iPing;
+	pBitStream->Read(iPing);
+
+	// Get a pointer to the player
+	CPlayerEntity * pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId);
+
+#ifdef SYNC_TEST
+	if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(1))
+	{
+		CPlayerEntity *pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(1);
+#ifndef TASKINFO_TEST
+		pPlayer->Deserialize(pBitStream);
+
+		//if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(1) && !g_pCore->GetGame()->GetVehicleManager()->DoesExists(1))
+		//{
+		//	g_pCore->GetGame()->GetLocalPlayer()->PutInVehicle(g_pCore->GetGame()->GetVehicleManager()->GetAt(0), 0);
+		//	CVector3 vecPosition;
+		//	g_pCore->GetGame()->GetPlayerManager()->GetAt(1)->GetPosition(vecPosition);
+		//	CVehicleEntity * pVehicle = new CVehicleEntity(90, vecPosition, 90, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+		//	if (pVehicle)
+		//	{
+		//		//	// Add our vehicle
+		//		g_pCore->GetGame()->GetVehicleManager()->Add(1, pVehicle);
+		//		pVehicle->SetId(1);
+		//		pVehicle->Create();
+		//		pVehicle->SetPosition(vecPosition, false);
+		//	}
+		//}
+
+#endif
+
+
+
+	}
+#endif
+
+	// Is the player pointer valid?
+	if (pPlayer)
+	{
+		// Set the player ping
+		pPlayer->SetPing(iPing);
+
+		// Check for local player
+		if (pPlayer->IsLocalPlayer())
+			return;
+
+		// Is the localplayer spawned?
+		if (g_pCore->GetGame()->GetLocalPlayer()->IsSpawned())
+		{
+			// Fail safe
+			if (playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId())
+			{
+				CLogFile::Printf("FATAL ERROR: Tried to sync a ped to localplayer! (LocalPlayer: %d, Player: %d)", g_pCore->GetGame()->GetLocalPlayer()->GetId(), playerId);
+				return;
+			}
+
+			auto oldReadOffset = pBitStream->GetReadOffset();
+			ePackageType eType;
+			pBitStream->Read(eType);
+			// Set it back so that the deserialize function can identify which packet is incoming 
+			// I dont want to pass a argument to Deserialize it should do what the name says deserialize a bitstream this means also the package id  
+			pBitStream->SetReadOffset(oldReadOffset);
+			switch (eType)
+			{
+			case RPC_PACKAGE_TYPE_PLAYER_ONFOOT:
+			case RPC_PACKAGE_TYPE_PLAYER_WEAPON:
+			case RPC_PACKAGE_TYPE_PLAYER_VEHICLE:
+			case RPC_PACKAGE_TYPE_PLAYER_PASSENGER:
+			{
+													  pPlayer->Deserialize(pBitStream);
+													  break;
+			}
+			default:
+			{
+					   CLogFile::Print("Unkown package type, process...");
+					   break;
+			}
+			}
+		}
+	}
+}
+
+void CreateVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	EntityId vehicleId;
+	pBitStream->Read(vehicleId);
+
+	int vehicleModel;
+	pBitStream->Read(vehicleModel);
+
+	CVector3 vecPosition;
+	pBitStream->Read(vecPosition);
+	vecPosition.fZ += 0.4f;
+
+	float fAngle;
+	pBitStream->Read(fAngle);
+
+	DWORD color1;
+	pBitStream->Read(color1);
+
+	DWORD color2;
+	pBitStream->Read(color2);
+
+	DWORD color3;
+	pBitStream->Read(color3);
+
+	DWORD color4;
+	pBitStream->Read(color4);
+
+	DWORD color5;
+	pBitStream->Read(color5);
+
+	CVehicleEntity * pVehicle = new CVehicleEntity(vehicleModel, vecPosition, fAngle, color1, color2, color3, color4, color5);
+	g_pCore->GetGraphics()->GetChat()->Print(CString("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ));
+	CLogFile::Printf("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ);
+	if (pVehicle)
+	{
+		//	// Add our vehicle
+		g_pCore->GetGame()->GetVehicleManager()->Add(vehicleId, pVehicle);
+		pVehicle->SetId(vehicleId);
+		pVehicle->Create();
+		pVehicle->SetPosition(vecPosition, true);
+		pVehicle->SetRotation(CVector3(fAngle, 0.0f, 0.0f), true);
+	}
+}
+
+void UnloadResource(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	RakNet::RakString resourceName;
+	pBitStream->Read(resourceName);
+
+	g_pCore->GetResourceManager()->Unload(g_pCore->GetResourceManager()->GetResource(resourceName.C_String()));
+}
+
+void LoadResource(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	FileList* fileList = new FileList();
+	RakNet::RakString resourceName;
+	pBitStream->Read(resourceName);
+	fileList->Deserialize(pBitStream);
+	CLogFile::Printf("Files received from resource %s: %d", SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory() + resourceName).Get(), fileList->fileList.Size());
+	fileList->WriteDataToDisk(SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory() + resourceName).Get());
+
+	CLogFile::Printf("Loading resource (%s)", resourceName.C_String());
+	if (CResource* pResource = g_pCore->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory()), resourceName.C_String()))
+	{
+		if (!g_pCore->GetResourceManager()->StartResource(pResource))
+		{
+			CLogFile::Printf("Warning: Failed to load resource %s.", resourceName.C_String());
+		}
+	}
+	else
+	{
+		CLogFile::Printf("Warning: Failed to load resource %s.", resourceName.C_String());
+	}
+}
+
+void DownloadResourceFiles(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
+{
+	FileList* fileList = new FileList();
+	RakNet::RakString resourceName;
+	pBitStream->Read(resourceName);
+	fileList->Deserialize(pBitStream);
+	CLogFile::Printf("Files received from resource %s: %d", SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory() + resourceName).Get(), fileList->fileList.Size());
+	fileList->WriteDataToDisk(SharedUtility::GetAbsolutePath(g_pCore->GetResourceManager()->GetResourceDirectory() + resourceName).Get());
+}
+
 void GetPlayers(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 {
 	// Read the playerid
@@ -173,160 +431,6 @@ void GetPlayers(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 
 		// Notify the playermanager that we're having a new player
 		g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
-	}
-}
-
-void PlayerJoin(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Read the playerid
-	EntityId playerId;
-	pBitStream->Read(playerId);
-	
-	if(playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId()) return;
-
-	// Read the player name
-	RakNet::RakString _strName;
-	pBitStream->Read(_strName);
-	CString strPlayerName(_strName.C_String());
-
-	unsigned int uiColor;
-	pBitStream->Read(uiColor);
-
-	// Add the player
-	CPlayerEntity * pEntity = new CPlayerEntity;
-
-	pEntity->SetModel(0);
-
-	pEntity->Create();
-	pEntity->SetNick(strPlayerName);
-	pEntity->SetId(playerId);
-	pEntity->SetColor(uiColor);
-
-	// Notify the playermanager that we're having a new player
-	g_pCore->GetGame()->GetPlayerManager()->Add(playerId, pEntity);
-}
-
-void PlayerLeave(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Read the playerid
-	EntityId playerId;
-	pBitStream->Read(playerId);
-
-	// Remove the player from the player manager
-	g_pCore->GetGame()->GetPlayerManager()->Delete(playerId);
-}
-
-void PlayerChat(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Read the playerid
-	EntityId playerId;
-	pBitStream->Read(playerId);
-
-	// Read the input
-	RakNet::RakString strInput;
-	pBitStream->Read(strInput);
-
-	// Is the player active?
-	if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(playerId))
-	{
-		// Get the player pointer
-		CPlayerEntity * pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId);
-
-		// Is the player pointer valid?
-		if (pPlayer)
-		{
-			// Output the message
-			g_pCore->GetGraphics()->GetChat()->Print(CString("#%s%s#FFFFFF: %s", CString::DecimalToString(pPlayer->GetColor()).Get(), pPlayer->GetNick().Get(), strInput.C_String()));
-		}
-	}
-}
-
-void RecieveSyncPackage(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	// Read the playerid
-	EntityId playerId;
-	pBitStream->Read(playerId);
-
-	// Read the player ping
-	int iPing;
-	pBitStream->Read(iPing);
-
-	// Get a pointer to the player
-	CPlayerEntity * pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(playerId);
-
-#ifdef SYNC_TEST
-	if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(1))
-	{
-		CPlayerEntity *pPlayer = g_pCore->GetGame()->GetPlayerManager()->GetAt(1);
-#ifndef TASKINFO_TEST
-		pPlayer->Deserialize(pBitStream);
-
-		//if (g_pCore->GetGame()->GetPlayerManager()->DoesExists(1) && !g_pCore->GetGame()->GetVehicleManager()->DoesExists(1))
-		//{
-		//	g_pCore->GetGame()->GetLocalPlayer()->PutInVehicle(g_pCore->GetGame()->GetVehicleManager()->GetAt(0), 0);
-		//	CVector3 vecPosition;
-		//	g_pCore->GetGame()->GetPlayerManager()->GetAt(1)->GetPosition(vecPosition);
-		//	CVehicleEntity * pVehicle = new CVehicleEntity(90, vecPosition, 90, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
-		//	if (pVehicle)
-		//	{
-		//		//	// Add our vehicle
-		//		g_pCore->GetGame()->GetVehicleManager()->Add(1, pVehicle);
-		//		pVehicle->SetId(1);
-		//		pVehicle->Create();
-		//		pVehicle->SetPosition(vecPosition, false);
-		//	}
-		//}
-		
-#endif
-
-
-
-	}
-#endif
-
-	// Is the player pointer valid?
-	if (pPlayer)
-	{
-		// Set the player ping
-		pPlayer->SetPing(iPing);
-
-		// Check for local player
-		if (pPlayer->IsLocalPlayer())
-			return;
-
-		// Is the localplayer spawned?
-		if (g_pCore->GetGame()->GetLocalPlayer()->IsSpawned())
-		{
-			// Fail safe
-			if (playerId == g_pCore->GetGame()->GetLocalPlayer()->GetId())
-			{
-				CLogFile::Printf("FATAL ERROR: Tried to sync a ped to localplayer! (LocalPlayer: %d, Player: %d)", g_pCore->GetGame()->GetLocalPlayer()->GetId(), playerId);
-				return;
-			}
-
-			auto oldReadOffset = pBitStream->GetReadOffset();
-			ePackageType eType;
-			pBitStream->Read(eType);
-			// Set it back so that the deserialize function can identify which packet is incoming 
-			// I dont want to pass a argument to Deserialize it should do what the name says deserialize a bitstream this means also the package id  
-			pBitStream->SetReadOffset(oldReadOffset);
-			switch (eType)
-			{
-			case RPC_PACKAGE_TYPE_PLAYER_ONFOOT:
-			case RPC_PACKAGE_TYPE_PLAYER_WEAPON:
-			case RPC_PACKAGE_TYPE_PLAYER_VEHICLE:
-			case RPC_PACKAGE_TYPE_PLAYER_PASSENGER:
-				{
-					pPlayer->Deserialize(pBitStream);
-					break;
-				}
-			default:
-				{
-					CLogFile::Print("Unkown package type, process...");
-					break;
-				}
-			}
-		}
 	}
 }
 
@@ -799,50 +903,6 @@ void GetVehicles(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
 			pVehicle->SetSirenState(siren);
 			pVehicle->SetTaxiLightsState(taxilights);
 		}
-	}
-}
-
-void CreateVehicle(RakNet::BitStream * pBitStream, RakNet::Packet * pPacket)
-{
-	EntityId vehicleId;
-	pBitStream->Read(vehicleId);
-
-	int vehicleModel;
-	pBitStream->Read(vehicleModel);
-
-	CVector3 vecPosition;
-	pBitStream->Read(vecPosition);
-	vecPosition.fZ += 0.4f;
-	
-	float fAngle;
-	pBitStream->Read(fAngle);
-
-	DWORD color1;
-	pBitStream->Read(color1);
-
-	DWORD color2;
-	pBitStream->Read(color2);
-
-	DWORD color3;
-	pBitStream->Read(color3);
-
-	DWORD color4;
-	pBitStream->Read(color4);
-
-	DWORD color5;
-	pBitStream->Read(color5);
-
-	CVehicleEntity * pVehicle = new CVehicleEntity(vehicleModel, vecPosition, fAngle, color1, color2, color3, color4, color5);
-	g_pCore->GetGraphics()->GetChat()->Print(CString("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ));
-	CLogFile::Printf("%f, %f, %f", vecPosition.fX, vecPosition.fY, vecPosition.fZ);
-	if (pVehicle) 
-	{
-	//	// Add our vehicle
-		g_pCore->GetGame()->GetVehicleManager()->Add(vehicleId, pVehicle);
-		pVehicle->SetId(vehicleId);
-		pVehicle->Create();
-		pVehicle->SetPosition(vecPosition, true);
-		pVehicle->SetRotation(CVector3(fAngle, 0.0f, 0.0f), true);
 	}
 }
 
@@ -1473,6 +1533,10 @@ void CNetworkRPC::Register(RakNet::RPC4 * pRPC)
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_SYNC_PACKAGE), RecieveSyncPackage);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_CREATE_VEHICLE), CreateVehicle);
 
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE), UnloadResource);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_LOAD_RESOURCE), LoadResource);
+		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES), DownloadResourceFiles);
+
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLES), GetVehicles);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_PLAYERS), GetPlayers);
 		pRPC->RegisterFunction(GET_RPC_CODEX(RPC_GET_CHECKPOINTS), GetCheckpoints);
@@ -1552,6 +1616,10 @@ void CNetworkRPC::Unregister(RakNet::RPC4 * pRPC)
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_DELETE_PLAYER));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_SYNC_PACKAGE));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_CREATE_VEHICLE));
+
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_LOAD_RESOURCE));
+		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_DOWNLOAD_RESOURCE_FILES));
 
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_VEHICLES));
 		pRPC->UnregisterFunction(GET_RPC_CODEX(RPC_GET_PLAYERS));

@@ -29,6 +29,17 @@ bool CEvents::Add(CString strName, CEventHandler* pEventHandler)
 	}
 
 	itEvent->second.push_back(pEventHandler);
+
+	// Function for view all stored resources
+	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); iter++){
+		CLogFile::Printf("----- Event %s: %d", (*iter).first.Get(), (*iter).second.size());
+		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); iter2++){
+			if ((*iter2)->GetVM()->GetResource()->GetName().Get())
+				CLogFile::Printf("- Resource %s", (*iter2)->GetVM()->GetResource()->GetName().Get());
+			else
+				CLogFile::Printf("--- Error: unknown resource");
+		}
+	}
 	return true;
 }
 
@@ -43,7 +54,7 @@ CScriptArguments CEvents::Call(CString strName, CScriptArguments* pArguments, CE
 		{
 			if(EventType == CEventHandler::eEventType::GLOBAL_EVENT
 				&& pEvent->GetType() == CEventHandler::GLOBAL_EVENT)
-			{		
+			{
 				pEvent->Call(pArguments, &ret);
 				returnArguments.push(ret);
 			}
@@ -58,6 +69,12 @@ CScriptArguments CEvents::Call(CString strName, CScriptArguments* pArguments, CE
 				&& pEvent->GetType() == CEventHandler::eEventType::RESOURCE_EVENT
 				&& pVM == nullptr)
 			{
+				//Pruebas
+				if (strName.Compare(CString("playerCommand")) == 0){
+					CLogFile::Printf("Resource name: %s", pEvent->GetVM()->GetResource()->GetName().Get());
+				}
+				else
+					CLogFile::Printf("playerCommand");
 				pEvent->Call(pArguments, &ret);
 				returnArguments.push(ret);
 			}
@@ -84,11 +101,19 @@ bool CEvents::RemoveEvent(CString strName, CEventHandler::eEventType eventType, 
 		if ((*iter).first.Compare(strName) == 0){
 			for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); iter2++){
 				if (eventType == CEventHandler::RESOURCE_EVENT && pVM == (*iter2)->GetVM()){
-					(*iter).second.erase(iter2);
-					// Remove events with no handlers
-					if ((*iter).second.size() == 0)
-						m_Events.erase(iter);
-					return true;
+					if ((*iter2)->GetVM()->GetVMType() == eVMType::LUA_VM)
+					{
+						//TODO: Remove Lua event
+					}
+					else if ((*iter2)->GetVM()->GetVMType() == eVMType::SQUIRREL_VM)
+					{
+						sq_release(((CSquirrelVM*)pVM)->GetVM(), &(*iter2)->GetFunction());
+						(*iter).second.erase(iter2);
+						// Remove events with no handlers
+						if ((*iter).second.size() == 0)
+							m_Events.erase(iter);
+						return true;
+					}
 				}
 				else if ((*iter2)->GetType() == eventType && pVM == nullptr){
 					(*iter).second.erase(iter2);
@@ -125,19 +150,45 @@ bool CEvents::Remove(CString strName, CEventHandler* pEventHandler)
 }
 
 bool CEvents::RemoveResourceEvents(IScriptVM* pVM){
-	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); ++iter){
-		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end();){
-			if ((*iter2)->GetVM() == pVM)
-				(*iter).second.erase(iter2++);
-			else
-				iter2++;
-		}
 
+	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); iter++){
+		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); iter2++){
+			if ((*iter2)->GetVM() == pVM){
+				if ((*iter2)->GetVM()->GetVMType() == eVMType::LUA_VM)
+				{
+					//TODO: Remove Lua event
+				}
+				else if ((*iter2)->GetVM()->GetVMType() == eVMType::SQUIRREL_VM)
+				{
+					CLogFile::Printf("Deleting event %s...", (*iter).first.C_String());
+					CLogFile::Printf("Events before: %d", (*iter).second.size());
+					sq_release(((CSquirrelVM*)pVM)->GetVM(), &(*iter2)->GetFunction());
+					(*iter).second.erase(iter2--);
+					CLogFile::Printf("Event %s DELETED!!", (*iter).first.C_String());
+					CLogFile::Printf("Events after: %d", (*iter).second.size());
+				}
+			}
+		}
 		// Remove events with no handlers
-		if ((*iter).second.size() == 0)
+		if ((*iter).second.size() == 0){
+			CLogFile::Printf("Deleting %s empty...", (*iter).first.C_String());
 			m_Events.erase(iter);
-		else
-			iter++;
+			CLogFile::Printf("Empty DELETED!!");
+		}
+	}
+	// Function for view all stored resources
+	for (std::map<CString, std::list<CEventHandler*>>::iterator iter = m_Events.begin(); iter != m_Events.end(); iter++){
+		CLogFile::Printf("----- Event %s: %d", (*iter).first.Get(), (*iter).second.size());
+		for (std::list< CEventHandler* >::iterator iter2 = (*iter).second.begin(); iter2 != (*iter).second.end(); iter2++){
+			if ((*iter2)->GetVM()->GetResource()->GetName().Get())
+				CLogFile::Printf("- Resource %s", (*iter2)->GetVM()->GetResource()->GetName().Get());
+			else
+				CLogFile::Printf("--- Error: unknown resource");
+		}
+	}
+	if (m_Events.size() == 0){
+		m_Events.clear();
+		CLogFile::Printf("There aren' events...");
 	}
 	return true;
 }
