@@ -12,8 +12,7 @@
 #include <CLogFile.h>
 #include "../CLuaVM.h"
 #include "../CSquirrelVM.h"
-#include "CResourceServerScript.h"
-#include "CResourceClientScript.h"
+#include "CResourceScriptFile.h"
 #include <SharedUtility.h>
 #include <CXML.h>
 #include <Scripting/Natives/Natives.h>
@@ -31,7 +30,7 @@ CResource::CResource()
 	m_strResourceName(""),
 	m_bLoaded(false),
 	m_bActive(false),
-	m_resourceScriptType(eResourceScriptType::UNKNOWN)
+	m_resourceScriptLanguage(eResourceScriptLanguage::UNKNOWN)
 {
 
 
@@ -44,7 +43,7 @@ CResource::CResource(CString strAbsPath, CString strResourceName)
 	m_strResourceName(strResourceName),
 	m_bLoaded(false),
 	m_bActive(false),
-	m_resourceScriptType(eResourceScriptType::UNKNOWN)
+	m_resourceScriptLanguage(eResourceScriptLanguage::UNKNOWN)
 {
 
 	Load();
@@ -79,11 +78,11 @@ bool CResource::Load()
 		// Well its important to specify the script type so you can use any file ending
 		CString strScriptType = pMetaXML->getAttribute("scriptType");
 		if(strScriptType == "Lua")
-			m_resourceScriptType = eResourceScriptType::LUA_RESOURCE;
+			m_resourceScriptLanguage = eResourceScriptLanguage::LUA_RESOURCE;
 		else if(strScriptType == "Squirrel")
-			m_resourceScriptType = eResourceScriptType::SQUIRREL_RESOURCE;
+			m_resourceScriptLanguage = eResourceScriptLanguage::SQUIRREL_RESOURCE;
 		else 
-			m_resourceScriptType = eResourceScriptType::UNKNOWN;
+			m_resourceScriptLanguage = eResourceScriptLanguage::UNKNOWN;
 	}
 
 	// Reset to root
@@ -123,32 +122,45 @@ bool CResource::Load()
 				// Get the script name
 				CString strScript = pMetaXML->getAttribute("src");
 
-				if(!strScript.IsEmpty())
+				if (SharedUtility::Exists(CString(m_strResourceDirectoryPath + "/" + strScript).C_String()))
 				{
-					if (m_resourceScriptType == eResourceScriptType::UNKNOWN)
+					if (!strScript.IsEmpty())
 					{
-						// Try to detect the resource script type
-						if (strScript.EndsWith(".lua")) {
-							m_resourceScriptType = eResourceScriptType::LUA_RESOURCE;
-						} else if(strScript.EndsWith(".nut") || strScript.EndsWith(".sq")) {
-							m_resourceScriptType = eResourceScriptType::SQUIRREL_RESOURCE;
-						} else {
-							CLogFile::Printf("Unknown script type! Please specify the script type you use!");
-							return false;
+						if (m_resourceScriptLanguage == eResourceScriptLanguage::UNKNOWN)
+						{
+							// Try to detect the resource script type
+							if (strScript.EndsWith(".lua")) {
+								m_resourceScriptLanguage = eResourceScriptLanguage::LUA_RESOURCE;
+							}
+							else if (strScript.EndsWith(".nut") || strScript.EndsWith(".sq")) {
+								m_resourceScriptLanguage = eResourceScriptLanguage::SQUIRREL_RESOURCE;
+							}
+							else {
+								CLogFile::Printf("Unknown script type! Please specify the script type you use!");
+								return false;
+							}
+						}
+
+						CString scriptType = pMetaXML->getAttribute("type");
+						if (scriptType == "client") {
+							m_resourceFiles.push_back(new CResourceScriptFile(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get(), CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT));
+						}
+						else if (scriptType == "server") {
+							m_resourceFiles.push_back(new CResourceScriptFile(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get(), CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT));
+						}
+						else if (scriptType == "shared") {
+							m_resourceFiles.push_back(new CResourceScriptFile(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get(), CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT));
+							m_resourceFiles.push_back(new CResourceScriptFile(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get(), CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT));
+						}
+						else {
+							m_resourceFiles.push_back(new CResourceScriptFile(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get(), CResourceFile::RESOURCE_FILE_TYPE_SERVER_SCRIPT));
 						}
 					}
-
-					CString scriptType = pMetaXML->getAttribute("type");
-					if(scriptType == "client") {
-						m_resourceFiles.push_back(new CResourceClientScript(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get()));
-					} else if(scriptType == "server") {
-						m_resourceFiles.push_back(new CResourceServerScript(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get()));
-					} else if(scriptType == "shared") {
-						m_resourceFiles.push_back(new CResourceServerScript(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get()));
-						m_resourceFiles.push_back(new CResourceClientScript(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get()));
-					} else {
-						m_resourceFiles.push_back(new CResourceServerScript(this, strScript.Get(), (GetResourceDirectoryPath() + "/" + strScript).Get()));
-					}
+				}
+				else{
+					CLogFile::Print("====================================================================");
+					CLogFile::Printf("The script %s of the resource %s does not exists...", CString(m_strResourceDirectoryPath + "/" + strScript).C_String(), GetName().C_String());
+					CLogFile::Print("====================================================================");
 				}
 			}
 			// Attempt to load the next script node (if any)
@@ -185,7 +197,7 @@ bool CResource::Load()
 	return true;
 }
 
-bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, bool bStartIncludedResources)
+bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, bool bStartIncludedResources, CResourceFile::eResourceType resourceManagerType)
 {
 	if(IsLoaded())
 	{
@@ -194,17 +206,26 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 
 		for(auto pResourceFile : m_resourceFiles)
 		{
-			if(!pResourceFile->Start())
+			switch (pResourceFile->GetType())
 			{
-				// Stop all the resource items without any warnings
-				//StopAllResourceFiles();
-				DestroyVM();
-
-				m_bActive = false;
-				//m_bStarting = false;
-				return false;
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_CONFIG:
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_FILE:
+			case CResourceFile::RESOURCE_FILE_TYPE_CLIENT_SCRIPT:
+				m_bHasClientResourceFiles = true;
 			}
+			if (pResourceFile->GetType() == resourceManagerType)
+			{
+				if (!pResourceFile->Start())
+				{
+					// Stop all the resource items without any warnings
+					//StopAllResourceFiles();
+					DestroyVM();
 
+					m_bActive = false;
+					//m_bStarting = false;
+					return false;
+				}
+			}
 		}
 
 		if(bStartIncludedResources)
@@ -236,7 +257,7 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 		// Call the scripting event
 		CScriptArguments args;
 		args.push(m_strResourceName);
-		CEvents::GetInstance()->Call("resourceStarted", &args, CEventHandler::eEventType::NATIVE_EVENT, 0);
+		CEvents::GetInstance()->Call("resourceStarted", &args, CEventHandler::eEventType::NATIVE_EVENT, GetVM());
 		return true;
 	}
 
@@ -245,6 +266,12 @@ bool CResource::Start(std::list<CResource*> * dependents, bool bStartManually, b
 
 bool CResource::Stop(bool bStopManually)
 {
+	if (IsLoaded())
+	{
+		CEvents::GetInstance()->RemoveResourceEvents(m_pVM);
+		CLogFile::Print("Events deleted!!\n");
+		DestroyVM();
+	}	
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);
 	return true;
 }
@@ -258,19 +285,19 @@ bool CResource::Unload()
 	return false;
 }
 
-void CResource::Reload()
+bool CResource::Reload()
 {
 	Unload();
-	Load();
+	return Load();
 }
 
 bool CResource::CreateVM()
 {
 	if(m_bLoaded && !m_pVM)
 	{
-		if(GetResourceScriptType() == LUA_RESOURCE)	{
+		if(GetResourceScriptLanguage() == LUA_RESOURCE)	{
 			m_pVM =  new CLuaVM(this);
-		} else if(GetResourceScriptType() == SQUIRREL_RESOURCE) {
+		} else if(GetResourceScriptLanguage() == SQUIRREL_RESOURCE) {
 			m_pVM = new CSquirrelVM(this);
 		} else {
 			CLogFile::Printf("Failed to create VM => Invalid resource script type");
@@ -294,6 +321,7 @@ bool CResource::CreateVM()
 
 void CResource::DestroyVM()
 {
+	if (m_bLoaded && m_pVM) SAFE_DELETE(m_pVM);
 	CLogFile::Printf("[TODO] Implement %s", __FUNCTION__);
 }
 

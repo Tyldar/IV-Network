@@ -34,6 +34,7 @@
 #include <lua/lua.hpp>
 #include <Common.h>
 #include "IScriptVM.h"
+#include <vector>
 
 #include "CScriptArgument.h"
 
@@ -101,6 +102,8 @@ public:
 	void		*GetClassInstance(const char* szClassName);
 	void		 PushInstance(const char* szClassName, void * pInstance) { SetClassInstance(szClassName, pInstance); };
 	void		 RegisterFunction(const char* szFunctionName, scriptFunction pfnFunction, int iParameterCount = -1, const char* szFunctionTemplate = NULL, bool bPushRootTable = false);
+	
+	std::vector<std::string>	CLuaVM::split(const std::string& value, char separator);
 };
 
 #endif // CLuaVM_h

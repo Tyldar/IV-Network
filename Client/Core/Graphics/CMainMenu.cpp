@@ -643,6 +643,8 @@ bool CMainMenu::OnServerClicked(const CEGUI::EventArgs &eventArgs)
 	CEGUI::ListboxItem * pPing = pMultiColumnList->getNextSelected(pMaxPlayers);
 	CEGUI::ListboxItem * pMode = pMultiColumnList->getNextSelected(pPing);
 
+	CHECK_VALID(pHostname)
+
 	if (pLocked->getText() == "yes")
 	{
 		m_pGUI->ShowMessageBox("Sorry, this server is locked.");
@@ -655,7 +657,10 @@ bool CMainMenu::OnServerClicked(const CEGUI::EventArgs &eventArgs)
 
 		g_pCore->GetGame()->GetLocalPlayer()->SetNick(CVAR_GET_STRING("nick"));
 
-		//g_pCore->ConnectToServer(strAddress, usPort, ""); // The server password is empty if the player is able to get to this stage
+		CString address(pAddress->getText().c_str());
+
+		// Conneting the player to the server
+		g_pCore->GetNetworkManager()->Connect(address.Substring(0, address.Find(":", 0)), address.Substring(address.Find(":", 0) + 1).ToInteger(), "");
 
 		SetBrowserVisible(false);
 	}

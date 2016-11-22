@@ -57,7 +57,7 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>./;$(SolutionDir)\Shared;$(SolutionDir)\Libraries;$(SolutionDir)\Libraries\Squirrel</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_MBCS;_CRT_SECURE_NO_WARNINGS;_SERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>SYNC_TEST;_MBCS;_CRT_SECURE_NO_WARNINGS;_SERVER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <BrowseInformation>false</BrowseInformation>
     </ClCompile>
@@ -145,6 +145,7 @@
     <ClCompile Include="..\Libraries\lua\lundump.c" />
     <ClCompile Include="..\Libraries\lua\lvm.c" />
     <ClCompile Include="..\Libraries\lua\lzio.c" />
+    <ClCompile Include="..\Libraries\md5\md5.cpp" />
     <ClCompile Include="..\Libraries\Sqlite\sqlite3.c" />
     <ClCompile Include="..\Libraries\Squirrel\sqapi.cpp" />
     <ClCompile Include="..\Libraries\Squirrel\sqbaselib.cpp" />
@@ -171,11 +172,13 @@
     <ClCompile Include="..\Libraries\tinyxml\tinyxml.cpp" />
     <ClCompile Include="..\Libraries\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\Libraries\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="..\Shared\CLibrary.cpp" />
     <ClCompile Include="..\Shared\CLogFile.cpp" />
     <ClCompile Include="..\Shared\CSettings.cpp" />
     <ClCompile Include="..\Shared\CString.cpp" />
     <ClCompile Include="..\Shared\CXML.cpp" />
     <ClCompile Include="..\Shared\Network\CBitStream.cpp" />
+    <ClCompile Include="..\Shared\Network\CHttpClient.cpp" />
     <ClCompile Include="..\Shared\Scripting\ApplyTuple.cpp" />
     <ClCompile Include="..\Shared\Scripting\CEvents.cpp" />
     <ClCompile Include="..\Shared\Scripting\CLuaVM.cpp" />
@@ -189,11 +192,9 @@
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CIncludedResource.cpp" />
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResource.cpp" />
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceClientFile.cpp" />
-    <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceClientScript.cpp" />
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceFile.cpp" />
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceManager.cpp" />
     <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceScriptFile.cpp" />
-    <ClCompile Include="..\Shared\Scripting\ResourceSystem\CResourceServerScript.cpp" />
     <ClCompile Include="..\Shared\Scripting\SQL\CSQLite.cpp" />
     <ClCompile Include="..\Shared\SharedUtility.cpp" />
     <ClCompile Include="..\Shared\Threading\CMutex.cpp" />
@@ -213,10 +214,12 @@
     <ClCompile Include="Entity\CPlayerEntity.cpp" />
     <ClCompile Include="Entity\CVehicleEntity.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Network\CMasterList.cpp" />
     <ClCompile Include="Network\CNetworkModule.cpp" />
     <ClCompile Include="Network\CNetworkRPC.cpp" />
     <ClCompile Include="Scripting\Natives\CScriptClasses.cpp" />
     <ClCompile Include="Scripting\Natives\CServerNatives.cpp" />
+    <ClCompile Include="Scripting\ResourceSystem\CResourceServerManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Libraries\lua\lapi.h" />
@@ -244,7 +247,10 @@
     <ClInclude Include="..\Libraries\lua\lundump.h" />
     <ClInclude Include="..\Libraries\lua\lvm.h" />
     <ClInclude Include="..\Libraries\lua\lzio.h" />
+    <ClInclude Include="..\Libraries\md5\md5.h" />
+    <ClInclude Include="..\Shared\CLibrary.h" />
     <ClInclude Include="..\Shared\Network\CBitStream.h" />
+    <ClInclude Include="..\Shared\Network\CHttpClient.h" />
     <ClInclude Include="..\Shared\Network\PacketIdentifiers.h" />
     <ClInclude Include="..\Shared\Network\RPCIdentifiers.h" />
     <ClInclude Include="..\Shared\Scripting\ApplyTuple.h" />
@@ -263,11 +269,9 @@
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CIncludedResource.h" />
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResource.h" />
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceClientFile.h" />
-    <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceClientScript.h" />
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceFile.h" />
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceManager.h" />
     <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceScriptFile.h" />
-    <ClInclude Include="..\Shared\Scripting\ResourceSystem\CResourceServerScript.h" />
     <ClInclude Include="..\Shared\Scripting\SQL\CSQLite.h" />
     <ClInclude Include="CInput.h" />
     <ClInclude Include="CServer.h" />
@@ -286,12 +290,14 @@
     <ClInclude Include="Entity\CPlayerEntity.h" />
     <ClInclude Include="Entity\CVehicleEntity.h" />
     <ClInclude Include="Entity\Entities.h" />
+    <ClInclude Include="Network\CMasterList.h" />
     <ClInclude Include="Network\CNetworkModule.h" />
     <ClInclude Include="Network\CNetworkRPC.h" />
     <ClInclude Include="Scripting\Natives\CScriptClasses.h" />
     <ClInclude Include="Scripting\Natives\CScriptNatives.h" />
     <ClInclude Include="Scripting\Natives\CServerNatives.h" />
     <ClInclude Include="Scripting\Natives\Natives_Server.h" />
+    <ClInclude Include="Scripting\ResourceSystem\CResourceServerManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Server.rc" />

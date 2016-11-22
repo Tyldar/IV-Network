@@ -194,31 +194,14 @@ BYTE CVehicle::GetMaxPasssengers()
 	return 0;
 }
 
-bool CVehicle::HasSiren()
+void CVehicle::SetSirenState(bool bStatus)
 {
 	// Do we have a valid vehicle pointer?
 	IVehicle * pVehicle = GetVehicle();
 
 	if(pVehicle)
 	{
-		// Check if the siren flag is set
-		return IS_BIT_SET(*(BYTE *)(pVehicle + 0xF6E), 0x20);
-	}
-
-	return false;
-}
-
-void CVehicle::SetSirenState(bool bStatus)
-{
-	// Do we have a valid vehicle pointer?
-	IVehicle * pVehicle = GetVehicle();
-
-	if(pVehicle && HasSiren())
-	{
-		if(bStatus)
-			*(BYTE *)(pVehicle + 0xF69) = *(BYTE *)(pVehicle + 0xF69) & 0x9F | 0x10;
-		else
-			*(BYTE *)(pVehicle + 0xF69) &= 0x8F;
+		EFLC::CScript::SwitchCarSiren(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(pVehicle), bStatus);
 	}
 }
 
@@ -227,15 +210,9 @@ bool CVehicle::GetSirenState()
 	// Do we have a valid vehicle pointer?
 	IVehicle * pVehicle = GetVehicle();
 
-	if(pVehicle && HasSiren())
+	if(pVehicle)
 	{
-		if(!IS_BIT_SET(*(BYTE *)(pVehicle + 0xF69), 0x10))
-			return false;
-
-		if(!IS_BIT_SET(*(BYTE *)(pVehicle + 0xF69), 0x20))
-			return false;
-
-		return true;
+		return EFLC::CScript::IsCarSirenOn(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(pVehicle));
 	}
 
 	return false;
@@ -438,8 +415,10 @@ void CVehicle::SoundHorn(int iDuration)
 	// Do we have a valid vehicle pointer?
 	IVehicle * pVehicle = GetVehicle();
 
-	if(pVehicle)
-		pVehicle->m_dwHorn = 30 * iDuration / 1000;
+	if (pVehicle)
+	{
+		EFLC::CScript::SoundCarHorn(g_pCore->GetGame()->GetPools()->GetVehiclePool()->HandleOf(pVehicle), iDuration);
+	}
 }
 
 void CVehicle::SetComponentState(BYTE byteComponent, bool bState)

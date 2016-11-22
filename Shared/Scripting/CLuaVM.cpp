@@ -71,9 +71,8 @@ int LuaErrorReport(lua_State * L, int status)
 	}
 	return 0;
 }
-#include <vector>
 
-auto split(const std::string& value, char separator)
+auto CLuaVM::split(const std::string& value, char separator)
 -> std::vector<std::string>
 {
 	std::vector<std::string> result;

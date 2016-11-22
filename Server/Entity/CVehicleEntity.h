@@ -23,6 +23,10 @@ private:
 	float			m_fPetrolHealth;
 	float			m_fSteeringAngle;
 	bool			m_bEngineState;
+	bool			m_bSirenState;
+	bool			m_bLightsState;
+	bool			m_bHornState;
+	bool			m_bTaxiLightsState;
 	int				m_iLockedState;
 	int				m_iDirtLevel;
 	float			m_fHeading;
@@ -72,6 +76,18 @@ public:
 
 	void								SetColor(BYTE id, DWORD color) { if (id < 1 || id > 5) assert(CString("Set color%i?! ARE YOU IDIOT?!", id).Get()); else m_dwColor[id - 1] = color; }
 	DWORD								GetColor(BYTE id) { if (id < 1 || id > 5) assert(CString("Get color%i?! ARE YOU IDIOT?!", id).Get()); return m_dwColor[id - 1]; }
+
+	bool								GetSirenState() { return m_bSirenState; }
+	void								SetSirenState(bool bSirenState) { m_bSirenState = bSirenState; }
+
+	bool								GetLightsState() { return m_bLightsState; }
+	void								SetLightsState(bool bLightsState) { m_bLightsState = bLightsState; }
+
+	bool								GetHornState() { return m_bHornState; }
+	void								SetHornState(bool bHornState) { m_bHornState = bHornState; }
+
+	bool								GetTaxiLightsState() { return m_bTaxiLightsState; }
+	void								SetTaxiLightsState(bool bTaxiLightsState) { m_bTaxiLightsState = bTaxiLightsState; }
 };
 
 class CScriptVehicle : public CScriptEntity
@@ -86,6 +102,8 @@ public:
 	
 	void					SetPosition(float fX, float fY, float fZ);
 	void					SetRotation(float fX, float fY, float fZ);
+	CVector3				GetRotation() { CVector3 vecRot; GetEntity()->GetRotation(vecRot); return vecRot; };
+	
 	void					SetMoveSpeed(float fX, float fY, float fZ);
 	void					SetTurnSpeed(float fX, float fY, float fZ);
 
@@ -99,6 +117,17 @@ public:
 
 	void					SetEngine(bool bEngineState);
 	bool					GetEngine() { return GetEntity()->GetEngineState(); };
+
+	bool					GetSiren() { return GetEntity()->GetSirenState(); };
+	void					SetSiren(bool bSirenState);
+
+	bool					GetLights() { return GetEntity()->GetLightsState(); };
+	void					SetLights(bool bLightsState);	
+
+	bool					GetTaxiLights() { return GetEntity()->GetTaxiLightsState(); };
+	void					SetTaxiLights(bool bTaxiLightsState);
+
+	bool					GetHorn() { return GetEntity()->GetHornState(); };
 
 	void					SetDirtLevel(int iDirtLevel);
 	int						GetDirtLevel() { return GetEntity()->GetDirtLevel(); };

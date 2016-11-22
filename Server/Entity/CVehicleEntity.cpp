@@ -13,10 +13,11 @@
 #include <CServer.h>
 
 CVehicleEntity::CVehicleEntity() :
-	m_pScriptVehicle(nullptr), m_Matrix(Matrix()), m_fHealth(100),
+	m_pScriptVehicle(nullptr), m_Matrix(Matrix()), m_fHealth(1000.0f),
 	m_fPetrolHealth(100.0f), m_fSteeringAngle(0.0f), m_bEngineState(false),
-	m_iLockedState(0), m_iDirtLevel(0), m_fHeading(0.0f),
-	m_iModelId(0)
+	m_bSirenState(false), m_bHornState(false), m_bTaxiLightsState(false),
+	m_bLightsState(false), m_iLockedState(0), m_iDirtLevel(0),
+	m_fHeading(0.0f), m_iModelId(0)
 {
 
 }
@@ -88,6 +89,36 @@ void CScriptVehicle::SetLocked(int iLocked)
 	bitStream.Write(GetEntity()->GetId());
 	bitStream.Write(iLocked);
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_LOCKED), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
+void CScriptVehicle::SetSiren(bool bSirenState)
+{
+	GetEntity()->SetSirenState(bSirenState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bSirenState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_SIREN), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
+void CScriptVehicle::SetLights(bool bLightsState)
+{
+	GetEntity()->SetLightsState(bLightsState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bLightsState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_LIGHTS), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+}
+
+void CScriptVehicle::SetTaxiLights(bool bTaxiLightsState)
+{
+	GetEntity()->SetTaxiLightsState(bTaxiLightsState);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	bitStream.Write(bTaxiLightsState);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_VEHICLE_SET_TAXI_LIGHTS), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 }
 
 void CScriptVehicle::SetEngine(bool bEngineState)

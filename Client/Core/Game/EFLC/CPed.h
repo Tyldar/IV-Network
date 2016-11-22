@@ -262,7 +262,8 @@ public:
 	void                SetDucking(bool bDucking);
 	bool                IsDucking();
 
-	bool                IsInVehicle();
+	bool                IsInAnyVehicle();
+	bool                IsInVehicle(IVehicle * pVehicle);
 
 	void                SetCurrentVehicle(IVehicle * pVehicle);
 	IVehicle           * GetCurrentVehicle();

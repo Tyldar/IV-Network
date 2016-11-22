@@ -228,6 +228,45 @@ void CPlayerEntity::SetPosition(const CVector3& vecPosition)
 	}
 }
 
+int  CPlayerEntity::GetPing()
+{
+	return CServer::GetInstance()->GetNetworkModule()->GetPlayerPing(GetId());
+}
+
+void  CPlayerEntity::Kick()
+{
+	CServer::GetInstance()->GetNetworkModule()->KickPlayer(GetId(), true);
+}
+
+
+void CScriptPlayer::PutIntoVehicle(CScriptVehicle * pVehicle, unsigned char byteSeatId)
+{
+	GetEntity()->SetVehicleId(pVehicle->GetEntity()->GetId());
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetId());
+	bitStream.Write(GetVehicle()->GetId());
+	bitStream.Write(byteSeatId);
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PUT_INTO_VEHICLE), &bitStream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, INVALID_ENTITY_ID, true);
+}
+
+void CScriptPlayer::RemoveFromVehicle()
+{
+	GetEntity()->SetVehicleId(0xFFFF);
+
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetId());
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_REMOVE_FROM_VEHICLE), &bitStream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, INVALID_ENTITY_ID, true);
+}
+
+void CScriptPlayer::Kill()
+{
+	GetEntity()->SetSpawned(false);
+	
+	RakNet::BitStream bitStream;
+	bitStream.Write(GetEntity()->GetId());
+	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_DEATH), &bitStream, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, INVALID_ENTITY_ID, true);	
+}
 
 void CScriptPlayer::SetPosition(float fX, float fY, float fZ)
 {
@@ -264,8 +303,6 @@ void CScriptPlayer::SetTurnSpeed(float fX, float fY, float fZ)
 	bitStream.Write(CVector3(fX, fY, fZ));
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_SET_TURN_SPEED), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
 }
-
-
 
 void CScriptPlayer::SetHealth(float fHealth)
 {
@@ -359,7 +396,7 @@ void CScriptPlayer::SetHudElementVisible(int componentid, bool visible)
 void CScriptPlayer::TriggerPlayerEvent(CString eventName)
 {
 	RakNet::BitStream bitStream;
-	bitStream.Write(eventName);
+	bitStream.Write(RakNet::RakString(eventName.C_String()));
 	CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_TRIGGER_EVENT), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, GetEntity()->GetId(), false);
 }
 
@@ -418,6 +455,8 @@ void CScriptPlayer::SendPlayerMessage(CString sMessage, DWORD dwColor, bool bAll
 
 void CScriptPlayer::Spawn(float fX, float fY, float fZ, float fA)
 {
+	GetEntity()->SetSpawned(true);
+	
 	RakNet::BitStream bitStream;
 	bitStream.Write(CVector3(fX, fY, fZ)); //spawnPos
 	bitStream.Write(fA); //fHeading
@@ -489,6 +528,9 @@ void CPlayerEntity::Serialize(RakNet::BitStream * pBitStream, ePackageType pType
 				VehiclePacket.vehHealth = pVehicle->GetHealth();
 				//VehiclePacket.petrol = pVehicle->GetPetrolTankHealth();
 				VehiclePacket.bEngineState = pVehicle->GetEngineState();
+				VehiclePacket.bSirenState = pVehicle->GetSirenState();
+				VehiclePacket.bLightsState = pVehicle->GetLightsState();
+				VehiclePacket.bHornState = pVehicle->GetHornState();
 				VehiclePacket.fHeading = pVehicle->GetHeading();
 				VehiclePacket.playerArmor = GetArmour();
 				VehiclePacket.playerHealth = GetHealth();
@@ -567,7 +609,6 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 			{
 				pVehicle->SetQuaternion(VehiclePacket.matrix.quat);
 				pVehicle->SetPosition(VehiclePacket.matrix.vecPosition);
-				CLogFile::Printf("%f, %f, %f", VehiclePacket.matrix.vecPosition.fX, VehiclePacket.matrix.vecPosition.fY, VehiclePacket.matrix.vecPosition.fZ);
 				pVehicle->SetMoveSpeed(VehiclePacket.vecMoveSpeed);
 				pVehicle->SetTurnSpeed(VehiclePacket.vecTurnSpeed);			
 				
@@ -575,6 +616,10 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 				//pVehicle->SetPetrolTankHealth(VehiclePacket.petrol);
 
 				pVehicle->SetEngineState(VehiclePacket.bEngineState);
+				pVehicle->SetSirenState(VehiclePacket.bSirenState);
+				pVehicle->SetLightsState(VehiclePacket.bLightsState);
+				pVehicle->SetHornState(VehiclePacket.bHornState);
+
 				pVehicle->SetHeading(VehiclePacket.fHeading);
 
 				SetHealth(VehiclePacket.playerHealth);
@@ -599,12 +644,13 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 
 			m_Weapon.weaponType = WeaponPacket.weapon.weaponType;
 			m_Weapon.iAmmo = WeaponPacket.weapon.iAmmo;
-			CLogFile::Printf("Weapon sync 1: %i, %i, |%f, %f, %f|. 2: |%f, %f, %f|", WeaponPacket.weapon.weaponType, WeaponPacket.weapon.iAmmo, WeaponPacket.vecAimShotAtCoordinates.fX, WeaponPacket.vecAimShotAtCoordinates.fY, WeaponPacket.vecAimShotAtCoordinates.fZ, WeaponPacket.vecShotSource.fX, WeaponPacket.vecShotSource.fY, WeaponPacket.vecShotSource.fZ);
 		}
 		break;
 	case RPC_PACKAGE_TYPE_PLAYER_PASSENGER:
 		{
 			CNetworkPlayerPassengerSyncPacket PassengerPacket;
+
+			pBitStream->Read(PassengerPacket);
 
 			SetControlState(PassengerPacket.ControlState);
 			SetPosition(PassengerPacket.vecPosition);
@@ -612,7 +658,7 @@ void CPlayerEntity::Deserialize(RakNet::BitStream * pBitStream, ePackageType pTy
 			SetHealth(PassengerPacket.playerHealth);
 
 			m_vehicleId = PassengerPacket.vehicleId;
-			//m_vehicleSeatId = PassengerPacket.byteSeatId;
+			m_vehicleSeatId = PassengerPacket.byteSeatId;
 
 			m_eLastSyncPackageType = pType;
 			m_ulLastSyncReceived = SharedUtility::GetTime();

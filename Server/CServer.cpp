@@ -67,11 +67,16 @@ CServer::~CServer()
 	SAFE_DELETE(m_pBlipManager);
 
 	SAFE_DELETE(m_pCheckpointManager);
+
+	SAFE_DELETE(m_pTimerManager);
+
+	SAFE_DELETE(m_pNetworkModule);
 }
 
 void OnCreateVM(IScriptVM* pVM)
 {
 	CScriptClasses::Register(pVM);
+	CServerNatives::Register(pVM);
 }
 
 bool CServer::Startup()
@@ -133,6 +138,8 @@ bool CServer::Startup()
 		
 	CLogFile::Printf(" Max Players: %d", CVAR_GET_INTEGER("maxplayers"));
 
+	CLogFile::Printf(" Namesakes: %d", CVAR_GET_BOOL("namesakes"));
+
 #ifdef _WIN32
         SetConsoleTextAttribute((HANDLE)GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         CLogFile::Print("====================================================================");
@@ -169,7 +176,7 @@ bool CServer::Startup()
 
 		CLogFile::Print("");
 	}
-	m_pResourceManager = new CResourceManager("resources");
+	m_pResourceManager = new CResourceServerManager();
 	m_pResourceManager->SetCreateVMCallback(OnCreateVM);
 
 	// Loading resources
@@ -196,9 +203,9 @@ bool CServer::Startup()
 		if(!strResource.IsEmpty())
 		{
 			CLogFile::Printf("Loading resource (%s)", strResource.C_String());
-			if(CResource* pResource = m_pResourceManager->Load(SharedUtility::GetAbsolutePath(m_pResourceManager->GetResourceDirectory()),strResource))
+			if (CResource* pResource = m_pResourceManager->Load(SharedUtility::GetAbsolutePath(m_pResourceManager->GetResourceDirectory()), strResource))
 			{
-				if (!m_pResourceManager->StartResource(pResource))
+				if (!m_pResourceManager->StartServerResource(pResource))
 				{
 					CLogFile::Printf("Warning: Failed to load resource %s.", strResource.Get());
 					iFailedResources++;
@@ -214,28 +221,13 @@ bool CServer::Startup()
 			}
 		}
 	}
-#define CLIENT_FILE_DIRECTORY "client_files"
-	
-	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY);
-	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY "/resources");
-	for (auto pResource : m_pResourceManager->GetResources())
-	{
-		for (auto pFile : *pResource->GetResourceFiles())
-		{
-			if (pFile->GetType() == CResourceFile::eResourceType::RESOURCE_FILE_TYPE_CLIENT_SCRIPT)
-			{
-				SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/", pResource->GetName().C_String()).C_String());
-				SharedUtility::CopyFile(pFile->GetFileName(), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/%s", pResource->GetName().C_String(), pFile->GetName()));
-
-				// TODO: construct meta.xml for clients
-				SharedUtility::CopyFile(SharedUtility::GetAbsolutePath("/resources/%s/meta.xml", pResource->GetName().C_String()), SharedUtility::GetAbsolutePath(CLIENT_FILE_DIRECTORY "/resources/%s/meta.xml", pResource->GetName().C_String()));
-			}
-		}
-	}
 
 	CLogFile::Printf("Successfully loaded %d resources (%d failed).", iResourcesLoaded, iFailedResources);
+	
+#define CLIENT_FILE_DIRECTORY "client_files"
 
-	m_pNetworkModule->GetDirectoryDeltaTransfer()->AddUploadsFromSubdirectory(CLIENT_FILE_DIRECTORY);
+	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY);
+	SharedUtility::CreateDirectory(CLIENT_FILE_DIRECTORY "/resources");
 
 #ifdef _WIN32
         SetConsoleTextAttribute((HANDLE)GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_GREEN | FOREGROUND_INTENSITY);
@@ -249,6 +241,7 @@ bool CServer::Startup()
         CLogFile::Print("");
 #endif
 
+	m_upTime = time(0);
 	m_pNetworkModule->Startup();
 
 	return true;

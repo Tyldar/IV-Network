@@ -48,6 +48,7 @@ void CSettings::LoadDefaults(bool bClient)
 		AddString("password", "");
 		AddString("hostname", VERSION_IDENTIFIER_2 " Server");
 		AddString("hostaddress", "");
+		AddBool("namesakes", false);
 		AddList("module");
 		AddList("resource");
 	}

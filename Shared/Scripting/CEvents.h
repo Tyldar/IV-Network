@@ -53,9 +53,10 @@ public:
 
 	bool Add(CString strName, CEventHandler* pEventHandler);
 
+	bool RemoveEvent(CString strName, CEventHandler::eEventType eventType, IScriptVM* pVM);
 	bool Remove(CString strName, CEventHandler* pEventHandler);
 
-	bool RemoveScript(IScriptVM* pVM);
+	bool RemoveResourceEvents(IScriptVM* pVM);
 	bool IsEventRegistered(CString eventName);
 
 	void Clear();

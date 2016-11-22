@@ -15,6 +15,7 @@
 #include "../../../Server/Scripting/Natives/Natives_Server.h"
 #include "Entity/Entities.h"
 #include "CTimer.h"
+#include <CXML.h>
 #include <CServer.h>
 
 int IsPlayerConnected(int * VM)
@@ -241,6 +242,52 @@ int CreateTimer(int * VM)
 	return 1;
 }
 
+int OpenXML(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString strFilePath;
+	pVM->Pop(strFilePath);
+
+	CScriptXML* pScriptXML = new CScriptXML();
+	pScriptXML->load(strFilePath);
+	pVM->PushInstance("CXML", pScriptXML);
+
+	return 1;
+}
+
+int CreateFolder(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString folderName;
+	pVM->Pop(folderName);
+
+	SharedUtility::CreateDirectory(SharedUtility::GetAbsolutePath(folderName));
+
+	pVM->Push(SharedUtility::Exists(SharedUtility::GetAbsolutePath(folderName)));
+
+	return 1;
+}
+
+int Exists(int * VM)
+{
+	GET_SCRIPT_VM_SAFE;
+
+	pVM->ResetStackIndex();
+
+	CString pathName;
+	pVM->Pop(pathName);
+
+	pVM->Push(SharedUtility::Exists(SharedUtility::GetAbsolutePath("/%s", pathName.C_String())));
+
+	return 1;
+}
+
 class CScriptSQLite
 {
 public:
@@ -268,6 +315,9 @@ void CScriptClasses::Register(IScriptVM * pVM)
 	pVM->RegisterFunction("createCheckpoint", CreateCheckpoint);
 	pVM->RegisterFunction("createBlip", CreateBlip);
 	pVM->RegisterFunction("createTimer", CreateTimer);
+	pVM->RegisterFunction("openXML", OpenXML);
+	pVM->RegisterFunction("createFolder", CreateFolder);
+	pVM->RegisterFunction("exists", Exists);
 
 #if 0
 	(new CScriptClass<CScriptSQLite>("CSQLite"))->
@@ -284,6 +334,31 @@ void CScriptClasses::Register(IScriptVM * pVM)
 		AddMethod("close", &CScriptMySQL::Close).
 		Register(pVM);
 #endif
+	{ // ScriptXML
+		static CScriptClass<CScriptXML>* pScriptXML = &(new CScriptClass<CScriptXML>("CXML"))->
+			AddMethod("save", &CScriptXML::save).
+			AddMethod("close", &CScriptXML::close).
+			AddMethod("setTabSize", &CScriptXML::setTabSize).
+			AddMethod("getAttribute", &CScriptXML::getAttribute).
+			AddMethod("removeAttribute", &CScriptXML::removeAttribute).
+			AddMethod("setAttribute", &CScriptXML::setAttribute).
+			AddMethod("nodeName", &CScriptXML::nodeName).
+			AddMethod("nodeSetName", &CScriptXML::nodeSetName).
+			AddMethod("nodeContent", &CScriptXML::nodeContent).
+			AddMethod("nodeSetContent", &CScriptXML::nodeSetContent).
+			AddMethod("nodeToRoot", &CScriptXML::nodeToRoot).
+			AddMethod("findNode", &CScriptXML::findNode).
+			AddMethod("nextNode", &CScriptXML::nextNode).					
+			AddMethod("previousNode", &CScriptXML::previousNode).
+			AddMethod("childNodeFirst", &CScriptXML::childNodeFirst).
+			AddMethod("nodeParent", &CScriptXML::nodeParent).
+			AddMethod("nodeClear", &CScriptXML::nodeClear).
+			AddMethod("newNode", &CScriptXML::newNode).
+			AddMethod("newComment", &CScriptXML::newComment).
+			AddMethod("lastError", &CScriptXML::lastError).
+			AddMethod("isComment", &CScriptXML::isComment);
+		(pScriptXML)->Register(pVM);
+	}
 
 	{ // ScriptPlayer
 		static CScriptClass<CScriptPlayer>* pScriptPlayer = &(new CScriptClass<CScriptPlayer>("CPlayerEntity"))->
@@ -312,6 +387,8 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getWantedLevel", &CScriptPlayer::GetWantedLevel). // Synced
 			AddMethod("setWantedLevel", &CScriptPlayer::SetWantedLevel). // Synced
 			AddMethod("giveWeapon", &CScriptPlayer::GiveWeapon). // Synced
+			AddMethod("getWeaponType", &CScriptPlayer::GetWeaponType). // Synced
+			AddMethod("getWeaponAmmo", &CScriptPlayer::GetWeaponAmmo). // Synced
 			AddMethod("giveMoney", &CScriptPlayer::GiveMoney). // Synced
 			AddMethod("setColor", &CScriptPlayer::SetColor). // Synced
 			AddMethod("getColor", &CScriptPlayer::GetColor). // Synced
@@ -322,25 +399,41 @@ void CScriptClasses::Register(IScriptVM * pVM)
 			AddMethod("getClothes", &CScriptPlayer::GetClothes). // Synced	
 			AddMethod("isOnFoot", &CScriptPlayer::IsOnFoot).
 			AddMethod("spawn", &CScriptPlayer::Spawn).
+			AddMethod("kill", &CScriptPlayer::Kill).
+			AddMethod("isSpawned", &CScriptPlayer::IsSpawned).
 			AddMethod("getVehicle", &CScriptPlayer::GetVehicle).
 			AddMethod("getVehicleSeat", &CScriptPlayer::GetVehicleSeat).
+			AddMethod("putIntoVehicle", &CScriptPlayer::PutIntoVehicle).
+			AddMethod("removeFromVehicle", &CScriptPlayer::RemoveFromVehicle).
+			AddMethod("getSerial", &CScriptPlayer::GetSerial).
+			AddMethod("getPing", &CScriptPlayer::GetPing).
+			AddMethod("kick", &CScriptPlayer::Kick).
 			AddMethod("triggerPlayerEvent", &CScriptPlayer::TriggerPlayerEvent);
 		(pScriptPlayer)->Register(pVM);
 	}
 
 	{ // ScriptVehicle
 		static CScriptClass<CScriptVehicle>* pScriptVehicle = &(new CScriptClass<CScriptVehicle>("CVehicleEntity"))->
+			//AddMethod("deleteVehicle", &CScriptVehicle::DeleteVehicle).
 			AddMethod("setPosition", &CScriptVehicle::SetPosition).
 			AddMethod("getPosition", &CScriptVehicle::GetPosition).
 			AddMethod("setRotation", &CScriptVehicle::SetRotation).
+			AddMethod("getRotation", &CScriptVehicle::GetRotation).
 			AddMethod("setMoveSpeed", &CScriptVehicle::SetMoveSpeed).
 			AddMethod("setTurnSpeed", &CScriptVehicle::SetTurnSpeed).
 			AddMethod("setHealth", &CScriptVehicle::SetHealth).
 			AddMethod("getHealth", &CScriptVehicle::GetHealth).
 			AddMethod("setLocked", &CScriptVehicle::SetLocked).
 			AddMethod("getLocked", &CScriptVehicle::GetLocked).
+			AddMethod("setSiren", &CScriptVehicle::SetSiren).
+			AddMethod("getSiren", &CScriptVehicle::GetSiren).
+			AddMethod("setLights", &CScriptVehicle::SetLights).
+			AddMethod("getLights", &CScriptVehicle::GetLights).
+			AddMethod("setTaxiLights", &CScriptVehicle::SetTaxiLights).
+			AddMethod("getTaxiLights", &CScriptVehicle::GetTaxiLights).
 			AddMethod("setEngine", &CScriptVehicle::SetEngine).
 			AddMethod("getEngine", &CScriptVehicle::GetEngine).
+			AddMethod("getHorn", &CScriptVehicle::GetHorn).
 			AddMethod("setDirtLevel", &CScriptVehicle::SetDirtLevel).
 			AddMethod("getDirtLevel", &CScriptVehicle::GetDirtLevel);
 		(pScriptVehicle)->Register(pVM);
@@ -348,7 +441,7 @@ void CScriptClasses::Register(IScriptVM * pVM)
 
 	{ // ScriptCheckpoint
 		static CScriptClass<CScriptCheckpoint>* pScriptCheckpoint = &(new CScriptClass<CScriptCheckpoint>("CCheckpointEntity"))->
-			//AddMethod("Delete", &CScriptCheckpoint::DeleteCheckpoint).
+			AddMethod("deleteCheckpoint", &CScriptCheckpoint::DeleteCheckpoint).
 			AddMethod("showForPlayer", &CScriptCheckpoint::ShowForPlayer).
 			AddMethod("hideForPlayer", &CScriptCheckpoint::HideForPlayer).
 			AddMethod("showForAll", &CScriptCheckpoint::ShowForAll).

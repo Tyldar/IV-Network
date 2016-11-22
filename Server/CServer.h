@@ -37,7 +37,7 @@
 #endif
 #include "Common.h"
 
-#include <Scripting/ResourceSystem/CResourceManager.h>
+#include "Scripting/ResourceSystem/CResourceServerManager.h"
 
 #include <Entity/CEntityManager.h>
 #include <Entity/Entities.h>
@@ -59,7 +59,7 @@ class CServer {
 private:
 	static CServer				* s_pInstance;
 
-	CResourceManager			* m_pResourceManager;
+	CResourceServerManager		* m_pResourceManager;
 
 	CPlayerManager				* m_pPlayerManager;
 	CVehicleManager				* m_pVehicleManager;
@@ -75,7 +75,7 @@ private:
 
 	CNetworkModule				* m_pNetworkModule;
 
-
+	unsigned int				m_upTime;
 	unsigned int                m_uiSyncRate = 10;// Seems VS2013 sometimes does not allow C++11 = 20; /** Describes the maximum number of sync packages sent per second per entity */
     unsigned int                m_uiMaximumFPS = 100;// Seems VS2013 sometimes does not allow C++11 = 100;
 
@@ -93,7 +93,7 @@ public:
 	void	Process();
 	void	Shutdown();
 
-	CResourceManager	*GetResourceManager() { return CResourceManager::GetInstance(); }
+	CResourceServerManager	*GetResourceManager() { return CResourceServerManager::GetInstance(); }
 
 	CPlayerManager		*GetPlayerManager() { return m_pPlayerManager; }
 	CVehicleManager		*GetVehicleManager() { return m_pVehicleManager; }
@@ -108,6 +108,8 @@ public:
 	CTimerManager		*GetTimerManager() { return m_pTimerManager; }
 
 	CNetworkModule		*GetNetworkModule() { return m_pNetworkModule; }
+
+	unsigned int		GetUpTime(){ return m_upTime; }
 
 	unsigned GetSyncRate() { return m_uiSyncRate; }
 	void	 SetSyncRate(unsigned int uiSyncRate = 10) { m_uiSyncRate = uiSyncRate; }

@@ -32,6 +32,8 @@
 #define CResourceScriptFile_h
 
 #include "CResourceFile.h"
+#include "CResource.h"
+#include <Scripting/CEvents.h>
 
 class CResource;
 
@@ -40,11 +42,11 @@ class CResourceScriptFile : public CResourceFile {
 private:
 
 public:
-	CResourceScriptFile(CResource * resource, const char * szShortName, const char * szResourceFileName);
+	CResourceScriptFile(CResource * resource, const char * szShortName, const char * szResourceFileName, CResourceFile::eResourceType resourceType);
 	~CResourceScriptFile();
 
-	virtual bool	Start() = 0;
-	virtual bool	Stop() = 0;
+	bool	Start();
+	bool	Stop();
 };
 
 #endif // CResourceScriptFile_h

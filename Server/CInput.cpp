@@ -31,6 +31,7 @@
 #include "CInput.h"
 #include <CLogFile.h>
 #include <Scripting/CEvents.h>
+#include <ctime>
 #include "CServer.h"
 
 extern bool g_bClose;
@@ -56,12 +57,14 @@ void CInput::ProcessInput(CString strInput)
 
 	if(strCommand.IsEmpty())
 		return;
-	else if(strCommand == "quit" || strCommand == "Quit" || strCommand == "exit") {
+	else if(strCommand == "quit" || strCommand == "Quit" || strCommand == "exit")
+	{
 		CLogFile::Print("[Server] Server is going to shutdown NOW ....");
 		g_bClose = true;
 		return;
-
-	} else if(strCommand == "help" || strCommand == "?" || strCommand == "--usage") {
+	} 
+	else if(strCommand == "help" || strCommand == "?" || strCommand == "--usage")
+	{
 		printf("========== Available console commands: ==========\n");
 		printf("say <text>\n");
 		printf("uptime\n");
@@ -70,16 +73,124 @@ void CInput::ProcessInput(CString strInput)
 		printf("loadresource <name>\n");
 		printf("reloadresource <name>\n");
 		printf("unloadresource <name>\n");
+		printf("setSyncRate <rate>\n");
+		printf("setMaxFPS <fps>\n");
 		printf("exit\n");
 		return;
 	}
-	else if (strCommand == "setSyncRate") {
+	else if (strCommand == "setSyncRate")
+	{
 		int rate = atoi(strParameters.Get());
 		CServer::GetInstance()->SetSyncRate(rate);
 	}
-	else if (strCommand == "setMaxFPS") {
+	else if (strCommand == "setMaxFPS")
+	{
 		int fps = atoi(strParameters.Get());
 		CServer::GetInstance()->SetMaximumFPS(fps);
+	}
+	else if (strCommand == "say")
+	{
+		RakNet::BitStream bitStream;
+		bitStream.Write(RakNet::RakString(strParameters.Get()));
+		bitStream.Write(0);
+		bitStream.Write(true);
+		CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_PLAYER_MESSAGE_TO_ALL), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+	}
+	else if (strCommand == "uptime")
+	{
+		int sec = time(0) - CServer::GetInstance()->GetUpTime();
+		int hh, mm, ss;
+		hh = sec / 3600;
+		mm = (sec - (hh * 3600)) / 60;
+		ss = sec - ((hh * 3600) + (mm * 60));
+		CLogFile::Printf("Server uptime: %d hours, %d minutes, %d seconds", hh, mm, ss);
+	}
+	else if (strCommand == "resources")
+	{
+		for (auto resource : CServer::GetInstance()->GetResourceManager()->GetResources())
+		{
+			CLogFile::Printf("%s : %s", resource->GetName().C_String(), resource->GetResourceDirectoryPath().C_String());
+		}
+	}
+	else if (strCommand == "loadresource")
+	{	
+		if (strParameters.IsEmpty()) return;
+		if (CServer::GetInstance()->GetResourceManager()->GetResource(strParameters)) return;
+
+		if (CResource* pResource = CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters))
+		{
+			if (!CServer::GetInstance()->GetResourceManager()->StartServerResource(pResource))
+				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+			else if(pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				// Send the name of the loaded resource to the client
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetResourceManager()->GetResourceFileList(pResource)->Serialize(&bitStream);
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_LOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
+		}
+		else
+			CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+	}
+	else if (strCommand == "reloadresource")
+	{
+		if (strParameters.IsEmpty()) return;
+		
+		CResource * pResource = CServer::GetInstance()->GetResourceManager()->GetResource(strParameters);
+
+		if (pResource == nullptr)
+			pResource = CServer::GetInstance()->GetResourceManager()->Load(SharedUtility::GetAbsolutePath(CServer::GetInstance()->GetResourceManager()->GetResourceDirectory()), strParameters);
+		else
+		{
+		if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
+			CServer::GetInstance()->GetResourceManager()->Reload(pResource);
+		}
+
+		if (!CServer::GetInstance()->GetResourceManager()->StartServerResource(pResource))
+				CLogFile::Printf("Warning: Failed to load resource %s.", strParameters.Get());
+		else if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+		{
+			// Send the name of the loaded resource to the client
+			RakNet::BitStream bitStream;
+			bitStream.Write(RakNet::RakString(strParameters.Get()));
+			CServer::GetInstance()->GetResourceManager()->GetResourceFileList(pResource)->Serialize(&bitStream);
+			CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_LOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+		}
+	}
+	else if (strCommand == "unloadresource")
+	{
+		if (strParameters.IsEmpty()) return;
+
+		CResource* pResource = CServer::GetInstance()->GetResourceManager()->GetResource(strParameters);
+		if (pResource)
+		{
+			if (pResource->HasClientResourceFilesScripts() && CServer::GetInstance()->GetPlayerManager()->GetCount() > 0)
+			{
+				// Send the name of the unloaded resource to the client
+				RakNet::BitStream bitStream;
+				bitStream.Write(RakNet::RakString(strParameters.Get()));
+				CServer::GetInstance()->GetNetworkModule()->Call(GET_RPC_CODEX(RPC_UNLOAD_RESOURCE), &bitStream, HIGH_PRIORITY, RELIABLE_ORDERED, -1, true);
+			}
+			CServer::GetInstance()->GetResourceManager()->Unload(pResource);
+		}
+		else
+			return;
+	}
+	else if (strCommand == "players")
+	{
+		for (EntityId i = 0; i < CServer::GetInstance()->GetPlayerManager()->GetMax(); ++i)
+		{
+			if (CServer::GetInstance()->GetPlayerManager()->DoesExists(i))
+			{
+				CLogFile::Printf("#%i: %s, %s", i, CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetName().Get(), CServer::GetInstance()->GetPlayerManager()->GetAt(i)->GetSerial().Get());
+			}
+		}
 	}
 }
 
