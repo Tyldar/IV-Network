@@ -917,9 +917,6 @@
     <ClCompile Include="..\..\Shared\Network\CHttpClient.cpp">
       <Filter>Source Files\Network\Shared</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Shared\Network\CFileListTransferCBInterface.cpp">
-      <Filter>Source Files\Network\Shared</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CCore.h">

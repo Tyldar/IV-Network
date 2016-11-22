@@ -13,6 +13,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{56387735-7D4A-47AA-A885-09CCC5D5AA67}</ProjectGuid>
     <RootNamespace>ClientCore</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.10240.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -197,7 +198,6 @@
     <ClCompile Include="..\..\Shared\CZlib.cpp" />
     <ClCompile Include="..\..\Shared\Game\CTrafficLights.cpp" />
     <ClCompile Include="..\..\Shared\Network\CBitStream.cpp" />
-    <ClCompile Include="..\..\Shared\Network\CFileListTransferCBInterface.cpp" />
     <ClCompile Include="..\..\Shared\Network\CHttpClient.cpp" />
     <ClCompile Include="..\..\Shared\Patcher\CPatcher.cpp" />
     <ClCompile Include="..\..\Shared\Scripting\ApplyTuple.cpp" />
